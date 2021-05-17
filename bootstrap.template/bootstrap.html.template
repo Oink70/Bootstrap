@@ -37,8 +37,7 @@
 
 				<h2>Bootstrap info</h2>
 				<ul>
-					<li>Snapshot timestamp: <b>Sun May 16 11:20:55 UTC 2021</b></li>
-					<li>Snapshot timestamp: <b>Sun May 16 11:20:55 UTC 2021</b></li>
+					<li>Snapshot timestamp: <b>%%BOOTSTRAP_TIMESTAMP%%</b></li>
 					<li>Block height at snapshot: <b><a href="https://explorer.verus.io/block/%%BOOTSTRAP_BESTBLOCKHASH%%" target="_blank">%%BOOTSTRAP_HEIGHT%%</a></b></li>
 					<li>Block hash: <b><a href="https://explorer.verus.io/block/%%BOOTSTRAP_BESTBLOCKHASH%%" target="_blank">%%BOOTSTRAP_BESTBLOCKHASH%%</a></b></li>
 					<li>Notes: <i>Unless you can guarantee no incoming transactions occur to your wallet's addresses while it is down to install the bootstrap, it is mandatory that you 'rescan' the blockchain data. See <a href="https://verus.io/downloads/how-to/how-to_bootstrap.html">the bootstrap howto</a></i></li>
