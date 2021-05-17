@@ -1,0 +1,157 @@
+#!/bin/bash -x
+##
+## This script creates bootstrap archives from the locally running chain in
+## tar.gz and zip format.
+## After the acrves are made, the MD5, SHA256 and SHA512 checksums are
+## calculated.
+## Of the archives a Verus Signature will be created (Still need to make that
+## optional, for now it's mandatory).
+## It creates a basic page, based on the customizable 
+## `bootstrap.html.template` with this data:
+##  - Cointicker and coin name
+##  - Basic links to the project (fixed to Verus now, needs work for future
+##    projects)
+##  - Bootstrap data like creation timestamp, blockheight and best hash
+##  - The bootstrap archives, their checksums and signature
+## After staging the page, it will move the current bootstrap webfolder to 
+## `last.<cointicker>-bootstrap`, and the staging folder will be renamed
+## to `<cointicker>-bootstrap` in the web root location supplied in the
+## json for the coin.
+##
+## Usage: `./bootstrap <Cointicker>`
+## the `<CoinTicker>.json` must be present in the same folder as the
+## `bootstrap` script. Configure your own `<CoinTicker>.json` and fill with
+## the required information. The entered values are case sensitive and paths
+## are absolute paths.
+## Supply a `<CoinTicker>.png` in the `img` folder for a logo on the page.
+## if no command line argument is entered, the script will exit.
+
+## check for command line input
+FILE=$1
+if [ -z "$FILE" ]; then
+    echo "No coin supplied to create Bootstrap for."
+    exit
+fi
+
+## Set script folder
+SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )"
+## Variables declaration
+COIN=$(jq -r .coin $SCRIPT_DIR/$FILE.json)
+COIN_NAME=$(jq -r .coin_name $SCRIPT_DIR/$FILE.json)
+DAEMON_USER=$(jq -r .daemon_user $SCRIPT_DIR/$FILE.json)
+DAEMON=$(jq -r .daemon $SCRIPT_DIR/$FILE.json)
+RPC_CLIENT=$(jq -r .rpc_client $SCRIPT_DIR/$FILE.json)
+CHAIN_FOLDER=$(jq -r .chain_folder $SCRIPT_DIR/$FILE.json)
+TEMPLATE_FOLDER=$(jq -r .template_folder $SCRIPT_DIR/$FILE.json)
+STAGING_FOLDER=$(jq -r .staging_folder $SCRIPT_DIR/$FILE.json)
+WEB_ROOT=$(jq -r .web_root $SCRIPT_DIR/$FILE.json)
+SIGNEE=$(jq .signee $SCRIPT_DIR/$FILE.json)
+
+## create staging folder (delete if it exists)
+if [[ -d "$STAGING_FOLDER" ]]
+then
+    rm -rf $STAGING_FOLDER
+fi
+cp -r $TEMPLATE_FOLDER $STAGING_FOLDER
+
+## record Bootstrap snapshot data
+
+echo "{" | tee $STAGING_FOLDER/$COIN.json
+echo "  \"coin\": \"$COIN\"," | tee -a $STAGING_FOLDER/$COIN.json
+echo "  \"bootstrap_timestamp\": \"$(date +%s)\"," | tee -a $STAGING_FOLDER/$COIN.json
+echo "  \"bootstrap_height\": \"$($RPC_CLIENT getblockcount)\"," | tee -a $STAGING_FOLDER/$COIN.json
+echo "  \"bootstrap_bestblockhash\": \"$($RPC_CLIENT getblockhash $($RPC_CLIENT getblockcount))\"," | tee -a $STAGING_FOLDER/$COIN.json
+echo "    \"bootstrap_types\": \"tar.gz zip\"" | tee -a $STAGING_FOLDER/$COIN.json
+echo '}' | tee -a $STAGING_FOLDER/$COIN.json
+
+## stopping daemon
+su -c "$RPC_CLIENT stop" $DAEMON_USER
+sleep 120
+
+##creating bootstrap archives
+cd $CHAIN_FOLDER
+tar -czvf $COIN-bootstrap.tar.gz blocks chainstate
+zip -r $COIN-bootstrap.zip  blocks chainstate
+
+
+## Starting daemon back up
+su -c "$DAEMON" $DAEMON_USER
+
+## moving bootstrap archives to bootstrap folder
+mv $CHAIN_FOLDER/$COIN-bootstrap.* $STAGING_FOLDER
+
+## creating checksum files
+cd $STAGING_FOLDER
+md5sum -b $COIN-bootstrap.tar.gz >$COIN-bootstrap.tar.gz.md5sum
+sha256sum -b $COIN-bootstrap.tar.gz >$COIN-bootstrap.tar.gz.sha256sum
+sha512sum -b $COIN-bootstrap.tar.gz >$COIN-bootstrap.tar.gz.sha512sum
+
+md5sum -b $COIN-bootstrap.zip >$COIN-bootstrap.zip.md5sum
+sha256sum -b $COIN-bootstrap.zip >$COIN-bootstrap.zip.sha256sum
+sha512sum -b $COIN-bootstrap.zip >$COIN-bootstrap.zip.sha512sum
+
+## Check if the daemon is started in a loop
+## If false wait 15 seconds and repeat loop
+## If true proceed to signing the archives
+dstat=0
+until [ $dstat == 1 ]; do
+  count=$($RPC_CLIENT getconnectioncount)
+  case $count in
+    ''|*[!0-9]*) dstat=0
+       sleep 15s ;;
+    *) dstat=1 ;;
+  esac
+done
+
+## create VerusID signatures
+
+bash -c "$RPC_CLIENT signfile $SIGNEE ${STAGING_FOLDER}/${COIN}-bootstrap.tar.gz" > $STAGING_FOLDER/$COIN-bootstrap.tar.gz.tmp
+{ head -n 1 $STAGING_FOLDER/$COIN-bootstrap.tar.gz.tmp; echo "  \"signee\": $SIGNEE,"; tail -n +2 $STAGING_FOLDER/$COIN-bootstrap.tar.gz.tmp; } > $STAGING_FOLDER/$COIN-bootstrap.tar.gz.verusid
+bash -c "$RPC_CLIENT signfile $SIGNEE $STAGING_FOLDER/$COIN-bootstrap.zip"> $STAGING_FOLDER/$COIN-bootstrap.zip.tmp
+{ head -n 1 $STAGING_FOLDER/$COIN-bootstrap.zip.tmp; echo "  \"signee\": $SIGNEE,"; tail -n +2 $STAGING_FOLDER/$COIN-bootstrap.zip.tmp; } > $STAGING_FOLDER/$COIN-bootstrap.zip.verusid
+# rm $STAGING_FOLDER/$COIN-bootstrap.tar.gz.tmp $STAGING_FOLDER/$COIN-bootstrap.zip.tmp
+
+## stopping daemon (disabled for testing)
+#su -c "$RPC_CLIENT stop" $DAEMON_USER
+#sleep 120
+
+## Starting daemon back up with -reindex (disabled for testing)
+#su -c "$DAEMON -reindex" $DAEMON_USER
+
+## collect data about the bootstrap (recorded at daemon shutdown, filesizes read directly from files)
+COIN=$(jq -r .coin $STAGING_FOLDER/$COIN.json)
+BOOTSTRAP_TIMESTAMP=$(date -d @$(jq -r .bootstrap_timestamp $STAGING_FOLDER/$COIN.json))
+BOOTSTRAP_HEIGHT=$(jq -r .bootstrap_height $STAGING_FOLDER/$COIN.json)
+BOOTSTRAP_BESTBLOCKHASH=$(jq -r .bootstrap_bestblockhash $STAGING_FOLDER/$COIN.json)
+ZIP_SIZE=$(ls -lah $STAGING_FOLDER/$COIN-bootstrap.zip | awk '{ print $5}')
+TGZ_SIZE=$(ls -lah $STAGING_FOLDER/$COIN-bootstrap.tar.gz | awk '{ print $5}')
+
+## create populated $COIN.html from local template file
+mv $STAGING_FOLDER/bootstrap.html.template  $STAGING_FOLDER/$COIN.html
+sed -i "s/%%BOOTSTRAP_TIMESTAMP%%/$BOOTSTRAP_TIMESTAMP/gip" $STAGING_FOLDER/$COIN.html
+sed -i "s/%%BOOTSTRAP_BESTBLOCKHASH%%/$BOOTSTRAP_BESTBLOCKHASH/gip" $STAGING_FOLDER/$COIN.html
+sed -i "s/%%BOOTSTRAP_HEIGHT%%/$BOOTSTRAP_HEIGHT/gip" $STAGING_FOLDER/$COIN.html
+sed -i "s/%%ZIP_SIZE%%/$ZIP_SIZE/gip" $STAGING_FOLDER/$COIN.html
+sed -i "s/%%TGZ_SIZE%%/$TGZ_SIZE/gip" $STAGING_FOLDER/$COIN.html
+sed -i "s/%%COIN%%/$COIN/gip" $STAGING_FOLDER/$COIN.html
+sed -i "s/%%COIN_NAME%%/$COIN_NAME/gip" $STAGING_FOLDER/$COIN.html
+sed -i '$!N; /^\(.*\)\n\1$/!P; D' $STAGING_FOLDER/$COIN.html
+
+## Sanitizing of staging folder before deployment
+rm $STAGING_FOLDER/$COIN.json
+
+## moving folders for deployment
+mv $WEB_ROOT/$COIN-bootstrap $STAGING_FOLDER/last.$COIN-bootstrap
+mv $STAGING_FOLDER $WEB_ROOT/$COIN-bootstrap
+
+## create symlink
+cd $WEB_ROOT/$COIN-bootstrap
+ln -s $COIN.html index.html
+cd /
+
+## Set priviliges
+chown -R www-data:www-data $WEB_ROOT/$COIN-bootstrap
+
+## Sanitizing
+
+

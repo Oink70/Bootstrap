@@ -1,0 +1,12 @@
+{
+  "coin": "VRSCTEST",
+  "coin_name": "Verus TestNet",
+  "daemon_user": "verus",
+  "daemon": "/home/verus/bin/verusd -chain=VRSCTEST",
+  "rpc_client": "/home/verus/bin/verus -chain=VRSCTEST",
+  "chain_folder": "/home/verus/.komodo/vrsctest",
+  "template_folder": "/root/bin/bootstrap.template",
+  "staging_folder": "/tmp/bootstrap",
+  "web_root": "/var/www",
+  "signee": "Verus Coin Foundation Bootstrap@"
+}
