@@ -14,7 +14,7 @@
 ##  - Bootstrap data like creation timestamp, blockheight and best hash
 ##  - The bootstrap archives, their checksums and signature
 ## After staging the page, it will move the current bootstrap webfolder to 
-## `last.<cointicker>-bootstrap`, and the staging folder will be renamed
+## `last.<cointicker>-bootstrap` and the staging folder will be renamed
 ## to `<cointicker>-bootstrap` in the web root location supplied in the
 ## json for the coin.
 ##
@@ -59,13 +59,13 @@ cp -r $TEMPLATE_FOLDER $STAGING_FOLDER
 echo "{" | tee $STAGING_FOLDER/$COIN.json
 echo "  \"coin\": \"$COIN\"," | tee -a $STAGING_FOLDER/$COIN.json
 echo "  \"bootstrap_timestamp\": \"$(date +%s)\"," | tee -a $STAGING_FOLDER/$COIN.json
-echo "  \"bootstrap_height\": \"$($RPC_CLIENT getblockcount)\"," | tee -a $STAGING_FOLDER/$COIN.json
-echo "  \"bootstrap_bestblockhash\": \"$($RPC_CLIENT getblockhash $($RPC_CLIENT getblockcount))\"," | tee -a $STAGING_FOLDER/$COIN.json
+echo "  \"bootstrap_height\": \"$($RPC_CLIENT -datadir=$CHAIN_FOLDER getblockcount)\"," | tee -a $STAGING_FOLDER/$COIN.json
+echo "  \"bootstrap_bestblockhash\": \"$($RPC_CLIENT -datadir=$CHAIN_FOLDER getblockhash $($RPC_CLIENT -datadir=$CHAIN_FOLDER getblockcount))\"," | tee -a $STAGING_FOLDER/$COIN.json
 echo "    \"bootstrap_types\": \"tar.gz zip\"" | tee -a $STAGING_FOLDER/$COIN.json
 echo '}' | tee -a $STAGING_FOLDER/$COIN.json
 
 ## stopping daemon
-su -c "$RPC_CLIENT stop" $DAEMON_USER
+su -c "$RPC_CLIENT -datadir=$CHAIN_FOLDER stop" $DAEMON_USER
 sleep 120
 
 ##creating bootstrap archives
@@ -75,7 +75,7 @@ zip -r $COIN-bootstrap.zip  blocks chainstate
 
 
 ## Starting daemon back up
-su -c "$DAEMON" $DAEMON_USER
+su -c "cd $CHAIN_FOLDER && $DAEMON -datadir=$CHAIN_FOLDER -daemon 1>/dev/null 2>&1" $DAEMON_USER
 
 ## moving bootstrap archives to bootstrap folder
 mv $CHAIN_FOLDER/$COIN-bootstrap.* $STAGING_FOLDER
@@ -95,7 +95,7 @@ sha512sum -b $COIN-bootstrap.zip >$COIN-bootstrap.zip.sha512sum
 ## If true proceed to signing the archives
 dstat=0
 until [ $dstat == 1 ]; do
-  count=$($RPC_CLIENT getconnectioncount)
+  count=$($RPC_CLIENT -datadir=$CHAIN_FOLDER getconnectioncount)
   case $count in
     ''|*[!0-9]*) dstat=0
        sleep 15s ;;
@@ -105,18 +105,18 @@ done
 
 ## create VerusID signatures
 
-bash -c "$RPC_CLIENT signfile $SIGNEE ${STAGING_FOLDER}/${COIN}-bootstrap.tar.gz" > $STAGING_FOLDER/$COIN-bootstrap.tar.gz.tmp
+bash -c "$RPC_CLIENT -datadir=$CHAIN_FOLDER signfile $SIGNEE ${STAGING_FOLDER}/${COIN}-bootstrap.tar.gz" > $STAGING_FOLDER/$COIN-bootstrap.tar.gz.tmp
 { head -n 1 $STAGING_FOLDER/$COIN-bootstrap.tar.gz.tmp; echo "  \"signee\": $SIGNEE,"; tail -n +2 $STAGING_FOLDER/$COIN-bootstrap.tar.gz.tmp; } > $STAGING_FOLDER/$COIN-bootstrap.tar.gz.verusid
-bash -c "$RPC_CLIENT signfile $SIGNEE $STAGING_FOLDER/$COIN-bootstrap.zip"> $STAGING_FOLDER/$COIN-bootstrap.zip.tmp
+bash -c "$RPC_CLIENT -datadir=$CHAIN_FOLDER signfile $SIGNEE $STAGING_FOLDER/$COIN-bootstrap.zip"> $STAGING_FOLDER/$COIN-bootstrap.zip.tmp
 { head -n 1 $STAGING_FOLDER/$COIN-bootstrap.zip.tmp; echo "  \"signee\": $SIGNEE,"; tail -n +2 $STAGING_FOLDER/$COIN-bootstrap.zip.tmp; } > $STAGING_FOLDER/$COIN-bootstrap.zip.verusid
 # rm $STAGING_FOLDER/$COIN-bootstrap.tar.gz.tmp $STAGING_FOLDER/$COIN-bootstrap.zip.tmp
 
-## stopping daemon (disabled for testing)
-#su -c "$RPC_CLIENT stop" $DAEMON_USER
-#sleep 120
+## stopping daemon
+su -c "$RPC_CLIENT -datadir=$CHAIN_FOLDER stop" $DAEMON_USER
+sleep 120
 
-## Starting daemon back up with -reindex (disabled for testing)
-#su -c "$DAEMON -reindex" $DAEMON_USER
+## Starting daemon back up with -reindex
+su -c "cd $CHAIN_FOLDER && $DAEMON -datadir=$CHAIN_FOLDER -reindex -daemon 1>/dev/null 2>&1" $DAEMON_USER
 
 ## collect data about the bootstrap (recorded at daemon shutdown, filesizes read directly from files)
 COIN=$(jq -r .coin $STAGING_FOLDER/$COIN.json)
@@ -141,7 +141,8 @@ sed -i '$!N; /^\(.*\)\n\1$/!P; D' $STAGING_FOLDER/$COIN.html
 rm $STAGING_FOLDER/$COIN.json
 
 ## moving folders for deployment
-mv $WEB_ROOT/$COIN-bootstrap $STAGING_FOLDER/last.$COIN-bootstrap
+rm $WEB_ROOT/last.$COIN-bootstrap
+mv $WEB_ROOT/$COIN-bootstrap $WEB_ROOT/last.$COIN-bootstrap
 mv $STAGING_FOLDER $WEB_ROOT/$COIN-bootstrap
 
 ## create symlink
