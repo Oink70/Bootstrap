@@ -141,7 +141,7 @@ sed -i '$!N; /^\(.*\)\n\1$/!P; D' $STAGING_FOLDER/$COIN.html
 rm $STAGING_FOLDER/$COIN.json
 
 ## moving folders for deployment
-rm $WEB_ROOT/last.$COIN-bootstrap
+rm -rf $WEB_ROOT/last.$COIN-bootstrap
 mv $WEB_ROOT/$COIN-bootstrap $WEB_ROOT/last.$COIN-bootstrap
 mv $STAGING_FOLDER $WEB_ROOT/$COIN-bootstrap
 
