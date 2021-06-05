@@ -30,7 +30,13 @@
 FILE=$1
 if [ -z "$FILE" ]; then
     echo "No coin supplied to create Bootstrap for."
-    exit
+    exit 1
+fi
+
+#Dependencies: jq (command-line json parser/editor)
+if ! command -v jq &>/dev/null ; then
+    echo "jq not found. please install using your package manager."
+    exit 1
 fi
 
 ## Set script folder
@@ -58,7 +64,7 @@ cp -r $TEMPLATE_FOLDER $STAGING_FOLDER
 
 echo "{" | tee $STAGING_FOLDER/$COIN.json
 echo "  \"coin\": \"$COIN\"," | tee -a $STAGING_FOLDER/$COIN.json
-echo "  \"bootstrap_timestamp\": \"$(date +%s)\"," | tee -a $STAGING_FOLDER/$COIN.json
+echo "  \"bootstrap_timestamp\": \"$($RPC_CLIENT -datadir=$CHAIN_FOLDER getblock $($RPC_CLIENT -datadir=$CHAIN_FOLDER getblockcount) 1 | jq -r .time)\"," | tee -a $STAGING_FOLDER/$COIN.json
 echo "  \"bootstrap_height\": \"$($RPC_CLIENT -datadir=$CHAIN_FOLDER getblockcount)\"," | tee -a $STAGING_FOLDER/$COIN.json
 echo "  \"bootstrap_bestblockhash\": \"$($RPC_CLIENT -datadir=$CHAIN_FOLDER getblockhash $($RPC_CLIENT -datadir=$CHAIN_FOLDER getblockcount))\"," | tee -a $STAGING_FOLDER/$COIN.json
 echo "    \"bootstrap_types\": \"tar.gz zip\"" | tee -a $STAGING_FOLDER/$COIN.json
@@ -66,7 +72,14 @@ echo '}' | tee -a $STAGING_FOLDER/$COIN.json
 
 ## stopping daemon
 su -c "$RPC_CLIENT -datadir=$CHAIN_FOLDER stop" $DAEMON_USER
-sleep 120
+
+## monitoring if the daemon is still running, before continuing
+while ps -u $DAEMON_USER x | grep $DAEMON | grep "$CHAIN_FOLDER\ " | cut -f2 -d" " - &>/dev/null; do
+    if [ $# -gt 0 ]; then
+        echo "$DAEMON $CHAIN_FOLDER still running";
+        sleep 2
+    fi
+done
 
 ##creating bootstrap archives
 cd $CHAIN_FOLDER
@@ -113,7 +126,14 @@ bash -c "$RPC_CLIENT -datadir=$CHAIN_FOLDER signfile $SIGNEE $STAGING_FOLDER/$CO
 
 ## stopping daemon
 su -c "$RPC_CLIENT -datadir=$CHAIN_FOLDER stop" $DAEMON_USER
-sleep 120
+
+## monitoring if the daemon is still running, before continuing
+while ps -u $DAEMON_USER x | grep $DAEMON | grep "$CHAIN_FOLDER\ " | cut -f2 -d" " - &>/dev/null; do
+    if [ $# -gt 0 ]; then
+        echo "$DAEMON $CHAIN_FOLDER still running";
+        sleep 2
+    fi
+done
 
 ## Starting daemon back up with -reindex
 su -c "cd $CHAIN_FOLDER && $DAEMON -datadir=$CHAIN_FOLDER -reindex -daemon 1>/dev/null 2>&1" $DAEMON_USER
