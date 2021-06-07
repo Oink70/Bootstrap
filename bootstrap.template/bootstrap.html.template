@@ -28,11 +28,7 @@
 			<p>
 				<h2>Coin info</h2>
 				<ul>
-					<li>Website: <a href="https://verus.io/" target="_blank">https://verus.io/</a></li>
-					<li>Github: <a href="https://github.com/veruscoin/veruscoin" target="_blank">https://github.com/veruscoin/veruscoin</a></li>
-					<li>Bitcointalk: <a href="https://bitcointalk.org/index.php?topic=4070404.0" target="_blank">https://bitcointalk.org/index.php?topic=4070404.0</a></li>
-					<li>Discord: <a href="https://verus.io/discord" target="_blank">https://verus.io/discord</a></li>
-					<li>Explorer: <a href="https://explorer.verus.io" target="_blank">https://explorer.verus.io</a></li>
+					
 				</ul>
 
 				<h2>Bootstrap info</h2>

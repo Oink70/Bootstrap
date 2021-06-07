@@ -8,5 +8,28 @@
   "template_folder": "/root/bin/bootstrap.template",
   "staging_folder": "/tmp/bootstrap",
   "web_root": "/var/www",
-  "signee": "Verus Coin Foundation Bootstrap@"
+  "signee": "Verus Coin Foundation Bootstrap@",
+  "links":[
+    {
+      "tag": "Website",
+      "URL": "https://verus.io"
+    },
+    {
+      "tag": "Github",
+      "URL": "https://github.com/veruscoin"
+    },
+    {
+      "tag": "Bitcointalk",
+      "URL": "https://bitcointalk.org/index.php?topic=4070404.0"
+    },
+    {
+      "tag": "Discord",
+      "URL": "https://verus.io/discord"
+    },
+    {
+      "tag": "Explorer",
+      "URL": "https://explorer.verus.io"
+    }
+  ]
+
 }

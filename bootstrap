@@ -145,6 +145,8 @@ TGZ_SIZE=$(ls -lah $STAGING_FOLDER/$COIN-bootstrap.tar.gz | awk '{ print $5}')
 
 ## Create populated $COIN.html from local template file
 mv $STAGING_FOLDER/bootstrap.html.template  $STAGING_FOLDER/$COIN.html
+
+## replace placeholders for values with recorded values
 sed -i "s/%%BOOTSTRAP_TIMESTAMP%%/$BOOTSTRAP_TIMESTAMP/gip" $STAGING_FOLDER/$COIN.html
 sed -i "s/%%BOOTSTRAP_BESTBLOCKHASH%%/$BOOTSTRAP_BESTBLOCKHASH/gip" $STAGING_FOLDER/$COIN.html
 sed -i "s/%%BOOTSTRAP_HEIGHT%%/$BOOTSTRAP_HEIGHT/gip" $STAGING_FOLDER/$COIN.html
@@ -153,6 +155,17 @@ sed -i "s/%%TGZ_SIZE%%/$TGZ_SIZE/gip" $STAGING_FOLDER/$COIN.html
 sed -i "s/%%COIN%%/$COIN/gip" $STAGING_FOLDER/$COIN.html
 sed -i "s/%%COIN_NAME%%/$COIN_NAME/gip" $STAGING_FOLDER/$COIN.html
 sed -i '$!N; /^\(.*\)\n\1$/!P; D' $STAGING_FOLDER/$COIN.html
+
+## Fill $COIN.html with links from $COIN.json
+m=$(jq -r ".links | length" $SCRIPT_DIR/$FILE.json)
+for (( n=m-1; n>=0; n-- ))
+do
+  tag=$(jq -r ".links[$n].tag" $SCRIPT_DIR/$FILE.json)
+  url=$(jq -r ".links[$n].URL" $SCRIPT_DIR/$FILE.json)
+  mv $STAGING_FOLDER/$COIN.html $STAGING_FOLDER/$COIN.tmp
+  { head -n 30 $STAGING_FOLDER/$COIN.tmp; echo "\t\t\t\t\t<li>$tag: <a href=\"$url\" target=\"_blank\">$url</a></li>"; tail -n +31 $STAGING_FOLDER/$COIN.tmp; } > $STAGING_FOLDER/$COIN.html
+  rm -f $STAGING_FOLDER/$COIN.tmp
+done
 
 ## Sanitizing of staging folder before deployment
 rm $STAGING_FOLDER/$COIN.json
@@ -170,6 +183,5 @@ cd /
 ## Set priviliges
 chown -R www-data:www-data $WEB_ROOT/$COIN-bootstrap
 
-## Sanitizing
 
 
