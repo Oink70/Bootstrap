@@ -29,12 +29,12 @@ If no command line argument is entered, the script will exit.
 
 ## ToDo:
  - Make VerusID signatures optional.
- - Fill the website with links from the `<CoinTicker>.json`. Links are presently fixed in the template.
  - add an option (commandline or json) to restart the daemon with the `-reindex` parameter at the end, to ensure a consistent chain. This can currently be enforced by editing the script and removing or adding the `#` in front of lines 115, 116 & 119
  - Make new templates in line with the Verus website style.
  - Whatever else springs to mind
 
 ## Changes:
+ - 2021-06-07; Fill the website with links from the `<CoinTicker>.json`.
  - 2021-06-07; Check if the chain is completely synchronized and wait for full synchronization if needed.
  - 2021-06-07; Fixed shutdown check on specific daemon.
  - 2021-06-05; Implemented a check on shutdown of the specific daemon.
