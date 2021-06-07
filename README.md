@@ -35,6 +35,7 @@ If no command line argument is entered, the script will exit.
  - Whatever else springs to mind
 
 ## Changes:
+ - 2021-06-07; Check if the chain is completely synchronized and wait for full synchronization if needed.
  - 2021-06-07; Fixed shutdown check on specific daemon.
  - 2021-06-05; Implemented a check on shutdown of the specific daemon.
  - 2021-06-05; Implemented dependencies check

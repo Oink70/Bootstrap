@@ -33,7 +33,7 @@ if [ -z "$FILE" ]; then
     exit 1
 fi
 
-#Dependencies: jq (command-line json parser/editor)
+# Dependencies: jq (command-line json parser/editor)
 if ! command -v jq &>/dev/null ; then
     echo "jq not found. please install using your package manager."
     exit 1
@@ -53,14 +53,17 @@ STAGING_FOLDER=$(jq -r .staging_folder $SCRIPT_DIR/$FILE.json)
 WEB_ROOT=$(jq -r .web_root $SCRIPT_DIR/$FILE.json)
 SIGNEE=$(jq .signee $SCRIPT_DIR/$FILE.json)
 
-## create staging folder (delete if it exists)
+## Create staging folder (delete if it exists)
 if [[ -d "$STAGING_FOLDER" ]]
 then
     rm -rf $STAGING_FOLDER
 fi
 cp -r $TEMPLATE_FOLDER $STAGING_FOLDER
 
-## record Bootstrap snapshot data
+## Check if the chain is completely synchronized and wait for full synchronization if needed.
+while [[ $($RPC_CLIENT -datadir=$CHAIN_FOLDER getinfo | jq .longestchain) -gt $($RPC_CLIENT -datadir=$CHAIN_FOLDER getinfo | jq .blocks) ]]; do sleep 15s; done
+
+## Record Bootstrap snapshot data
 
 echo "{" | tee $STAGING_FOLDER/$COIN.json
 echo "  \"coin\": \"$COIN\"," | tee -a $STAGING_FOLDER/$COIN.json
@@ -70,15 +73,15 @@ echo "  \"bootstrap_bestblockhash\": \"$($RPC_CLIENT -datadir=$CHAIN_FOLDER getb
 echo "    \"bootstrap_types\": \"tar.gz zip\"" | tee -a $STAGING_FOLDER/$COIN.json
 echo '}' | tee -a $STAGING_FOLDER/$COIN.json
 
-## stopping daemon
+## Stopping daemon
 su -c "$RPC_CLIENT -datadir=$CHAIN_FOLDER stop" $DAEMON_USER
 
-## monitoring if the daemon is still running, before continuing
+## Monitoring if the daemon is still running, before continuing
 while ps -u "$DAEMON_USER" x | grep "$DAEMON" | grep "$CHAIN_FOLDER\ "; do
     sleep 2s
 done
 
-##creating bootstrap archives
+## Creating bootstrap archives
 cd $CHAIN_FOLDER
 tar -czvf $COIN-bootstrap.tar.gz blocks chainstate
 zip -r $COIN-bootstrap.zip  blocks chainstate
@@ -87,10 +90,10 @@ zip -r $COIN-bootstrap.zip  blocks chainstate
 ## Starting daemon back up
 su -c "cd $CHAIN_FOLDER && $DAEMON -datadir=$CHAIN_FOLDER -daemon 1>/dev/null 2>&1" $DAEMON_USER
 
-## moving bootstrap archives to bootstrap folder
+## Moving bootstrap archives to bootstrap folder
 mv $CHAIN_FOLDER/$COIN-bootstrap.* $STAGING_FOLDER
 
-## creating checksum files
+## Creating checksum files
 cd $STAGING_FOLDER
 md5sum -b $COIN-bootstrap.tar.gz >$COIN-bootstrap.tar.gz.md5sum
 sha256sum -b $COIN-bootstrap.tar.gz >$COIN-bootstrap.tar.gz.sha256sum
@@ -113,18 +116,18 @@ until [ $dstat == 1 ]; do
   esac
 done
 
-## create VerusID signatures
+## Create VerusID signatures
 
 bash -c "$RPC_CLIENT -datadir=$CHAIN_FOLDER signfile $SIGNEE ${STAGING_FOLDER}/${COIN}-bootstrap.tar.gz" > $STAGING_FOLDER/$COIN-bootstrap.tar.gz.tmp
 { head -n 1 $STAGING_FOLDER/$COIN-bootstrap.tar.gz.tmp; echo "  \"signee\": $SIGNEE,"; tail -n +2 $STAGING_FOLDER/$COIN-bootstrap.tar.gz.tmp; } > $STAGING_FOLDER/$COIN-bootstrap.tar.gz.verusid
 bash -c "$RPC_CLIENT -datadir=$CHAIN_FOLDER signfile $SIGNEE $STAGING_FOLDER/$COIN-bootstrap.zip"> $STAGING_FOLDER/$COIN-bootstrap.zip.tmp
 { head -n 1 $STAGING_FOLDER/$COIN-bootstrap.zip.tmp; echo "  \"signee\": $SIGNEE,"; tail -n +2 $STAGING_FOLDER/$COIN-bootstrap.zip.tmp; } > $STAGING_FOLDER/$COIN-bootstrap.zip.verusid
-# rm $STAGING_FOLDER/$COIN-bootstrap.tar.gz.tmp $STAGING_FOLDER/$COIN-bootstrap.zip.tmp
+rm $STAGING_FOLDER/$COIN-bootstrap.tar.gz.tmp $STAGING_FOLDER/$COIN-bootstrap.zip.tmp
 
-## stopping daemon
+## Stopping daemon
 su -c "$RPC_CLIENT -datadir=$CHAIN_FOLDER stop" $DAEMON_USER
 
-## monitoring if the daemon is still running, before continuing
+## Monitoring if the daemon is still running, before continuing
 while ps -u "$DAEMON_USER" x | grep "$DAEMON" | grep "$CHAIN_FOLDER\ "; do
     sleep 2s
 done
@@ -132,7 +135,7 @@ done
 ## Starting daemon back up with -reindex
 su -c "cd $CHAIN_FOLDER && $DAEMON -datadir=$CHAIN_FOLDER -reindex -daemon 1>/dev/null 2>&1" $DAEMON_USER
 
-## collect data about the bootstrap (recorded at daemon shutdown, filesizes read directly from files)
+## Collect data about the bootstrap (recorded at daemon shutdown, filesizes read directly from files)
 COIN=$(jq -r .coin $STAGING_FOLDER/$COIN.json)
 BOOTSTRAP_TIMESTAMP=$(date -d @$(jq -r .bootstrap_timestamp $STAGING_FOLDER/$COIN.json))
 BOOTSTRAP_HEIGHT=$(jq -r .bootstrap_height $STAGING_FOLDER/$COIN.json)
@@ -140,7 +143,7 @@ BOOTSTRAP_BESTBLOCKHASH=$(jq -r .bootstrap_bestblockhash $STAGING_FOLDER/$COIN.j
 ZIP_SIZE=$(ls -lah $STAGING_FOLDER/$COIN-bootstrap.zip | awk '{ print $5}')
 TGZ_SIZE=$(ls -lah $STAGING_FOLDER/$COIN-bootstrap.tar.gz | awk '{ print $5}')
 
-## create populated $COIN.html from local template file
+## Create populated $COIN.html from local template file
 mv $STAGING_FOLDER/bootstrap.html.template  $STAGING_FOLDER/$COIN.html
 sed -i "s/%%BOOTSTRAP_TIMESTAMP%%/$BOOTSTRAP_TIMESTAMP/gip" $STAGING_FOLDER/$COIN.html
 sed -i "s/%%BOOTSTRAP_BESTBLOCKHASH%%/$BOOTSTRAP_BESTBLOCKHASH/gip" $STAGING_FOLDER/$COIN.html
@@ -154,12 +157,12 @@ sed -i '$!N; /^\(.*\)\n\1$/!P; D' $STAGING_FOLDER/$COIN.html
 ## Sanitizing of staging folder before deployment
 rm $STAGING_FOLDER/$COIN.json
 
-## moving folders for deployment
+## Moving folders for deployment
 rm -rf $WEB_ROOT/last.$COIN-bootstrap
 mv $WEB_ROOT/$COIN-bootstrap $WEB_ROOT/last.$COIN-bootstrap
 mv $STAGING_FOLDER $WEB_ROOT/$COIN-bootstrap
 
-## create symlink
+## Create symlink
 cd $WEB_ROOT/$COIN-bootstrap
 ln -s $COIN.html index.html
 cd /
