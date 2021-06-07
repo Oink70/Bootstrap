@@ -29,7 +29,7 @@ If no command line argument is entered, the script will exit.
 
 ## ToDo:
  - Make VerusID signatures optional.
- - add an option (commandline or json) to restart the daemon with the `-reindex` parameter at the end, to ensure a consistent chain. This can currently be enforced by editing the script and removing or adding the `#` in front of lines 115, 116 & 119
+ - add an option (commandline or json) to restart the daemon with the `-reindex` parameter at the end, to ensure a consistent chain. This can currently be enforced by editing the script and removing or adding the `#` in front of lines 127-136
  - Make new templates in line with the Verus website style.
  - Whatever else springs to mind
 
