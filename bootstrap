@@ -74,11 +74,8 @@ echo '}' | tee -a $STAGING_FOLDER/$COIN.json
 su -c "$RPC_CLIENT -datadir=$CHAIN_FOLDER stop" $DAEMON_USER
 
 ## monitoring if the daemon is still running, before continuing
-while ps -u $DAEMON_USER x | grep $DAEMON | grep "$CHAIN_FOLDER\ " | cut -f2 -d" " - &>/dev/null; do
-    if [ $# -gt 0 ]; then
-        echo "$DAEMON $CHAIN_FOLDER still running";
-        sleep 2
-    fi
+while ps -u "$DAEMON_USER" x | grep "$DAEMON" | grep "$CHAIN_FOLDER\ "; do
+    sleep 2s
 done
 
 ##creating bootstrap archives
@@ -128,11 +125,8 @@ bash -c "$RPC_CLIENT -datadir=$CHAIN_FOLDER signfile $SIGNEE $STAGING_FOLDER/$CO
 su -c "$RPC_CLIENT -datadir=$CHAIN_FOLDER stop" $DAEMON_USER
 
 ## monitoring if the daemon is still running, before continuing
-while ps -u $DAEMON_USER x | grep $DAEMON | grep "$CHAIN_FOLDER\ " | cut -f2 -d" " - &>/dev/null; do
-    if [ $# -gt 0 ]; then
-        echo "$DAEMON $CHAIN_FOLDER still running";
-        sleep 2
-    fi
+while ps -u "$DAEMON_USER" x | grep "$DAEMON" | grep "$CHAIN_FOLDER\ "; do
+    sleep 2s
 done
 
 ## Starting daemon back up with -reindex

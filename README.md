@@ -35,7 +35,7 @@ If no command line argument is entered, the script will exit.
  - Whatever else springs to mind
 
 ## Changes:
- -
+ - 2021-06-07; Fixed shutdown check on specific daemon.
  - 2021-06-05; Implemented a check on shutdown of the specific daemon.
  - 2021-06-05; Implemented dependencies check
  - 2021-06-05; Bootstrap time no longer shows the time the bootstrap process is actually started, but reflects the time the last included block was mined/staked.
