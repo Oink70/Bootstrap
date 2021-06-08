@@ -34,6 +34,7 @@ If no command line argument is entered, the script will exit.
  - Whatever else springs to mind
 
 ## Changes:
+ - 2021-06-08; Added external dependency check for `zip`.
  - 2021-06-07; Fill the website with links from the `<CoinTicker>.json`.
  - 2021-06-07; Check if the chain is completely synchronized and wait for full synchronization if needed.
  - 2021-06-07; Fixed shutdown check on specific daemon.

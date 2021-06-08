@@ -33,9 +33,13 @@ if [ -z "$FILE" ]; then
     exit 1
 fi
 
-# Dependencies: jq (command-line json parser/editor)
+# Dependencies: jq (command-line json parser/editor) and zip
 if ! command -v jq &>/dev/null ; then
     echo "jq not found. please install using your package manager."
+    exit 1
+fi
+if ! command -v zip &>/dev/null ; then
+    echo "zip not found. please install using your package manager."
     exit 1
 fi
 
@@ -163,7 +167,7 @@ do
   tag=$(jq -r ".links[$n].tag" $SCRIPT_DIR/$FILE.json)
   url=$(jq -r ".links[$n].URL" $SCRIPT_DIR/$FILE.json)
   mv $STAGING_FOLDER/$COIN.html $STAGING_FOLDER/$COIN.tmp
-  { head -n 30 $STAGING_FOLDER/$COIN.tmp; echo "\t\t\t\t\t<li>$tag: <a href=\"$url\" target=\"_blank\">$url</a></li>"; tail -n +31 $STAGING_FOLDER/$COIN.tmp; } > $STAGING_FOLDER/$COIN.html
+  { head -n 30 $STAGING_FOLDER/$COIN.tmp; echo -e "\t\t\t\t\t<li>$tag: <a href=\"$url\" target=\"_blank\">$url</a></li>"; tail -n +31 $STAGING_FOLDER/$COIN.tmp; } > $STAGING_FOLDER/$COIN.html
   rm -f $STAGING_FOLDER/$COIN.tmp
 done
 
