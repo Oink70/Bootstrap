@@ -3,7 +3,7 @@
   "coin_name": "Verus",
   "daemon_user": "verus",
   "daemon": "/home/verus/bin/verusd",
-  "rpc_client": "/home/veprus/bin/verus",
+  "rpc_client": "/home/verus/bin/verus",
   "chain_folder": "/home/verus/.komodo/VRSC",
   "template_folder": "/root/bin/bootstrap.template",
   "staging_folder": "/tmp/bootstrap",
