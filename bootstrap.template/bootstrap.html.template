@@ -28,7 +28,7 @@
 			<p>
 				<h2>Coin info</h2>
 				<ul>
-					
+
 				</ul>
 
 				<h2>Bootstrap info</h2>
@@ -39,38 +39,31 @@
 					<li>Notes: <i>Unless you can guarantee no incoming transactions occur to your wallet's addresses while it is down to install the bootstrap, it is mandatory that you 'rescan' the blockchain data. See <a href="https://verus.io/downloads/how-to/how-to_bootstrap.html">the bootstrap howto</a></i></li>
 				</ul>
 
-				<h2>Download</h2>	
+				<h2>Download</h2>
 				<ul>
 					<li>Archive: <a href="%%COIN%%-bootstrap.tar.gz" target="_blank">%%COIN%%-bootstrap.tar.gz</a></li>
 					<li>File size: <b>%%TGZ_SIZE%%</b></li>
 					<li>
-						Checksums: <a href="%%COIN%%-bootstrap.tar.gz.md5sum" target="_blank">md5</a>, 
+						Checksums: <a href="%%COIN%%-bootstrap.tar.gz.md5sum" target="_blank">md5</a>,
 						<a href="%%COIN%%-bootstrap.tar.gz.sha256sum" target="_blank">sha256</a>,
 						<a href="%%COIN%%-bootstrap.tar.gz.sha512sum" target="_blank">sha512</a>
 					</li>
-					<li>
-						Signatures: <a href="%%COIN%%-bootstrap.tar.gz.verusid" target="_blank">signature</a>
-					</li>
+					<li>Signatures: <a href="%%COIN%%-bootstrap.tar.gz.verusid" target="_blank">signature</a></li>
 				</ul>
 				<ul>
-                    <li>Archive: <a href="%%COIN%%-bootstrap.zip" target="_blank">%%COIN%%-bootstrap.zip</a></li>
-                    <li>File size: <b>%%ZIP_SIZE%%</b></li>
-                    <li>
-                        Checksums: <a href="%%COIN%%-bootstrap.zip.md5sum" target="_blank">md5</a>,
-                        <a href="%%COIN%%-bootstrap.zip.sha256sum" target="_blank">sha256</a>,
-                        <a href="%%COIN%%-bootstrap.zip.sha512sum" target="_blank">sha512</a>
+          <li>Archive: <a href="%%COIN%%-bootstrap.zip" target="_blank">%%COIN%%-bootstrap.zip</a></li>
+          <li>File size: <b>%%ZIP_SIZE%%</b></li>
+          <li>
+            Checksums: <a href="%%COIN%%-bootstrap.zip.md5sum" target="_blank">md5</a>,
+            <a href="%%COIN%%-bootstrap.zip.sha256sum" target="_blank">sha256</a>,
+            <a href="%%COIN%%-bootstrap.zip.sha512sum" target="_blank">sha512</a>
 					</li>
-					<li>
-						Signatures: <a href="%%COIN%%-bootstrap.zip.verusid" target="_blank">signature</a>
-                    </li>
-
+					<li>Signatures: <a href="%%COIN%%-bootstrap.zip.verusid" target="_blank">signature</a></li>
 				</ul>
-
 			</p>
-
 			<p>
-<hr style="border-top: 1px dotted black; width: 666px; padding: 0; height: 0; margin: 0" />
-    	            <font size=1>&copy;2018-2021 <a href="https://verus.io/">verus.io</a>. The bootstrap archives and web pages are generated in Bash. Join us on <a href="https://verus.io/discord" target="_blank">Discord</a> to get in touch.</font>
+        <hr style="border-top: 1px dotted black; width: 666px; padding: 0; height: 0; margin: 0" />
+    	    <font size=1>&copy;2018-2021 <a href="https://verus.io/">verus.io</a>. The bootstrap archives and web pages are generated in Bash. Join us on <a href="https://verus.io/discord" target="_blank">Discord</a> to get in touch.</font>
 			</p>
 		</article>
 	</body>

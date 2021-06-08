@@ -4,19 +4,24 @@
 ## tar.gz and zip format.
 ## After the acrves are made, the MD5, SHA256 and SHA512 checksums are
 ## calculated.
-## Of the archives a Verus Signature will be created (Still need to make that
-## optional, for now it's mandatory).
-## It creates a basic page, based on the customizable 
+## Of the archives a Verus Signature will be created if that option is enabled
+## in the <COINTICKER>.json
+## It creates a basic page, based on the customizable
 ## `bootstrap.html.template` with this data:
 ##  - Cointicker and coin name
-##  - Basic links to the project (fixed to Verus now, needs work for future
-##    projects)
+##  - Basic links to the project
 ##  - Bootstrap data like creation timestamp, blockheight and best hash
 ##  - The bootstrap archives, their checksums and signature
-## After staging the page, it will move the current bootstrap webfolder to 
+## After staging the page, it will move the current bootstrap webfolder to
 ## `last.<cointicker>-bootstrap` and the staging folder will be renamed
 ## to `<cointicker>-bootstrap` in the web root location supplied in the
 ## json for the coin.
+##
+## options in the json:
+## - "sign": true|false (sign with VerusID)
+## - "archive": true|false (tar the webfolder for external deployment)
+## - "reindex": true|false (reindex the chain after creating bootstrap)
+## - "links": list of tags and links to display on the webpage
 ##
 ## Usage: `./bootstrap <Cointicker>`
 ## the `<CoinTicker>.json` must be present in the same folder as the
@@ -56,6 +61,9 @@ TEMPLATE_FOLDER=$(jq -r .template_folder $SCRIPT_DIR/$FILE.json)
 STAGING_FOLDER=$(jq -r .staging_folder $SCRIPT_DIR/$FILE.json)
 WEB_ROOT=$(jq -r .web_root $SCRIPT_DIR/$FILE.json)
 SIGNEE=$(jq .signee $SCRIPT_DIR/$FILE.json)
+REINDEX=$(jq .reindex $SCRIPT_DIR/$FILE.json)
+SIGN=$(jq .sign $SCRIPT_DIR/$FILE.json)
+ARCHIVE=$(jq .archive $SCRIPT_DIR/$FILE.json)
 
 ## Create staging folder (delete if it exists)
 if [[ -d "$STAGING_FOLDER" ]]
@@ -120,24 +128,37 @@ until [ $dstat == 1 ]; do
   esac
 done
 
-## Create VerusID signatures
+## check if signature creating is enabled and create VerusID signatures
+if $SIGN
+then
+  bash -c "$RPC_CLIENT -datadir=$CHAIN_FOLDER signfile $SIGNEE ${STAGING_FOLDER}/${COIN}-bootstrap.tar.gz" > $STAGING_FOLDER/$COIN-bootstrap.tar.gz.tmp
+  if [[ -f $STAGING_FOLDER/$COIN-bootstrap.tar.gz.tmp ]]
+  then
+      { head -n 1 $STAGING_FOLDER/$COIN-bootstrap.tar.gz.tmp; echo "  \"signee\": $SIGNEE,"; tail -n +2 $STAGING_FOLDER/$COIN-bootstrap.tar.gz.tmp; } > $STAGING_FOLDER/$COIN-bootstrap.tar.gz.verusid
+  fi
+  bash -c "$RPC_CLIENT -datadir=$CHAIN_FOLDER signfile $SIGNEE $STAGING_FOLDER/$COIN-bootstrap.zip"> $STAGING_FOLDER/$COIN-bootstrap.zip.tmp
+  if [[ -f $STAGING_FOLDER/$COIN-bootstrap.zip.tmp ]]
+  then
+    { head -n 1 $STAGING_FOLDER/$COIN-bootstrap.zip.tmp; echo "  \"signee\": $SIGNEE,"; tail -n +2 $STAGING_FOLDER/$COIN-bootstrap.zip.tmp; } > $STAGING_FOLDER/$COIN-bootstrap.zip.verusid
+  fi
+  rm $STAGING_FOLDER/$COIN-bootstrap.tar.gz.tmp $STAGING_FOLDER/$COIN-bootstrap.zip.tmp
+fi
 
-bash -c "$RPC_CLIENT -datadir=$CHAIN_FOLDER signfile $SIGNEE ${STAGING_FOLDER}/${COIN}-bootstrap.tar.gz" > $STAGING_FOLDER/$COIN-bootstrap.tar.gz.tmp
-{ head -n 1 $STAGING_FOLDER/$COIN-bootstrap.tar.gz.tmp; echo "  \"signee\": $SIGNEE,"; tail -n +2 $STAGING_FOLDER/$COIN-bootstrap.tar.gz.tmp; } > $STAGING_FOLDER/$COIN-bootstrap.tar.gz.verusid
-bash -c "$RPC_CLIENT -datadir=$CHAIN_FOLDER signfile $SIGNEE $STAGING_FOLDER/$COIN-bootstrap.zip"> $STAGING_FOLDER/$COIN-bootstrap.zip.tmp
-{ head -n 1 $STAGING_FOLDER/$COIN-bootstrap.zip.tmp; echo "  \"signee\": $SIGNEE,"; tail -n +2 $STAGING_FOLDER/$COIN-bootstrap.zip.tmp; } > $STAGING_FOLDER/$COIN-bootstrap.zip.verusid
-rm $STAGING_FOLDER/$COIN-bootstrap.tar.gz.tmp $STAGING_FOLDER/$COIN-bootstrap.zip.tmp
-
-## Stopping daemon
-su -c "$RPC_CLIENT -datadir=$CHAIN_FOLDER stop" $DAEMON_USER
-
-## Monitoring if the daemon is still running, before continuing
-while ps -u "$DAEMON_USER" x | grep "$DAEMON" | grep "$CHAIN_FOLDER\ "; do
+## depending on the value of $REINDEX, stop the chain and start it with the `-reindex` parameters
+if [[ "$REINDEX" == "false" ]]
+then
+  ## Reindex is disabled
+  sleep 1s
+else
+  ## Stopping daemon
+  su -c "$RPC_CLIENT -datadir=$CHAIN_FOLDER stop" $DAEMON_USER
+  ## Monitoring if the daemon is still running, before continuing
+  while ps -u "$DAEMON_USER" x | grep "$DAEMON" | grep "$CHAIN_FOLDER\ "; do
     sleep 2s
-done
-
-## Starting daemon back up with -reindex
-su -c "cd $CHAIN_FOLDER && $DAEMON -datadir=$CHAIN_FOLDER -reindex -daemon 1>/dev/null 2>&1" $DAEMON_USER
+  done
+  ## Starting daemon back up with -reindex
+  su -c "cd $CHAIN_FOLDER && $DAEMON -datadir=$CHAIN_FOLDER -reindex -daemon 1>/dev/null 2>&1" $DAEMON_USER
+fi
 
 ## Collect data about the bootstrap (recorded at daemon shutdown, filesizes read directly from files)
 COIN=$(jq -r .coin $STAGING_FOLDER/$COIN.json)
@@ -149,6 +170,12 @@ TGZ_SIZE=$(ls -lah $STAGING_FOLDER/$COIN-bootstrap.tar.gz | awk '{ print $5}')
 
 ## Create populated $COIN.html from local template file
 mv $STAGING_FOLDER/bootstrap.html.template  $STAGING_FOLDER/$COIN.html
+
+## Remove signature lines from template if signature files are not present.
+if [ ! -f $STAGING_FOLDER/$COIN-bootstrap.tar.gz.verusid ]
+then
+  sed -i '/<li>Signatures/d' $STAGING_FOLDER/$COIN.html
+fi
 
 ## replace placeholders for values with recorded values
 sed -i "s/%%BOOTSTRAP_TIMESTAMP%%/$BOOTSTRAP_TIMESTAMP/gip" $STAGING_FOLDER/$COIN.html
@@ -187,5 +214,9 @@ cd /
 ## Set priviliges
 chown -R www-data:www-data $WEB_ROOT/$COIN-bootstrap
 
-
-
+if $ARCHIVE
+then
+  cd $WEB_ROOT
+  tar -cvf $COIN-bootstrap.tar $COIN-bootstrap
+  mv $WEB_ROOT/$COIN-bootstrap.tar $WEB_ROOT/$COIN-bootstrap
+fi

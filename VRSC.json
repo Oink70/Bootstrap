@@ -9,6 +9,9 @@
   "staging_folder": "/tmp/bootstrap",
   "web_root": "/var/www",
   "signee": "Verus Coin Foundation Bootstrap@",
+  "reindex": true,
+  "sign": true,
+  "archive": true,
   "links":[
     {
       "tag": "Website",
