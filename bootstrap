@@ -214,8 +214,15 @@ cd /
 ## Set priviliges
 chown -R www-data:www-data $WEB_ROOT/$COIN-bootstrap
 
+## create an archive for the entire website, for easy distribution
 if $ARCHIVE
 then
+  ## remove web archive from the last.$COIN-bnootstrap to conserve drivespace
+  if [ ! -f $WEB_ROOT/last.$COIN-bootstrap/$COIN-bootstrap.tar ]
+  then
+    rm -f $WEB_ROOT/last.$COIN-bootstrap/$COIN-bootstrap.tar
+  fi
+  ## create archive
   cd $WEB_ROOT
   tar -cvf $COIN-bootstrap.tar $COIN-bootstrap
   mv $WEB_ROOT/$COIN-bootstrap.tar $WEB_ROOT/$COIN-bootstrap

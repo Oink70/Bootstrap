@@ -36,14 +36,15 @@ Supply a `<CoinTicker>.png` in the `img` folder for a logo on the page.
 If no command line argument is entered, the script will exit.
 
 ## ToDo:
- - Testing on VRSC mainnet (time intensive) and VRSCTEST PBaaS chains
+ - Testing on VRSCTEST PBaaS chains.
  - Make new templates in line with the Verus website style.
  - Whatever else springs to mind.
 
 
 ## Changes:
+ - 2021-06-09; Auto-remove distribution archive from `last.$COIN-bootstrap` folder to conserve storage space.
  - 2021-06-08; Signatures and links to them are removed from webpage if signing fails.
- - 2021-06-08; Made optional archive for distribution through value in `<COINTICKER>.json`. Archive is placed in the bootstrap webfolder for easy downloading.
+ - 2021-06-08; Made optional archive for distribution through value in `<COINTICKER>.json`. Archive is placed in the bootstrap web folder for easy downloading.
  - 2021-06-08; Made signed releases optional through value in `<COINTICKER>.json`.
  - 2021-06-08; Made reindexing optional through value in `<COINTICKER>.json`.
  - 2021-06-08; Added external dependency check for `zip`.
