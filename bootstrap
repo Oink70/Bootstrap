@@ -72,6 +72,17 @@ then
 fi
 cp -r $TEMPLATE_FOLDER $STAGING_FOLDER
 
+## Check if the daemon is running. If not exit, otherwise continue
+dstat=0
+count=$($RPC_CLIENT getconnectioncount)
+case $count in
+    ''|*[!0-9]*) dstat=0 ;;
+    *) dstat=1 ;;
+esac
+if [[ "$dstat" == "0" ]]; then
+        exit 1
+fi
+
 ## Check if the chain is completely synchronized and wait for full synchronization if needed.
 while [[ $($RPC_CLIENT -datadir=$CHAIN_FOLDER getinfo | jq .longestchain) -gt $($RPC_CLIENT -datadir=$CHAIN_FOLDER getinfo | jq .blocks) ]]; do sleep 15s; done
 
