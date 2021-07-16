@@ -74,7 +74,7 @@ cp -r $TEMPLATE_FOLDER $STAGING_FOLDER
 
 ## Check if the daemon is running. If not exit, otherwise continue
 dstat=0
-count=$($RPC_CLIENT getconnectioncount)
+count=$(su -c "$RPC_CLIENT getconnectioncount" $DAEMON_USER)
 case $count in
     ''|*[!0-9]*) dstat=0 ;;
     *) dstat=1 ;;
