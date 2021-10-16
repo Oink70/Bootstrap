@@ -137,7 +137,7 @@ if [ "$COIN" == "VRSC" ]; then
   CHECK_STATUS="UNKNOWN"
   while [[ ! "$CHECK_STATUS" == "OK" ]]; do
     # collect data
-    HASH_LOCAL=$(/home/verus/bin/verus getbestblockhash)
+    HASH_LOCAL=$(su -c "${RPC_CLIENT} -chain=${COIN} -datadir=${CHAIN_FOLDER} getbestblockhash" "${DAEMON_USER}")
     HEIGHT_REMOTE=$(${CURL} --silent "https://explorer.verus.io/api/getblockcount")
     HASH_REMOTE=$(${CURL} --silent "https://explorer.verus.io/api/getblockhash?index=${HEIGHT_REMOTE}" | ${JQ} -r .)
 
