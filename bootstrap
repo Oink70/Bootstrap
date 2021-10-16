@@ -186,7 +186,7 @@ ${ZIP} -r "${COIN}-bootstrap.zip"  blocks chainstate
 su -c "cd ${CHAIN_FOLDER} && ${DAEMON}  -chain=${COIN} -datadir=${CHAIN_FOLDER} -daemon 1>/dev/null 2>&1" "${DAEMON_USER}"
 
 ## Moving bootstrap archives to bootstrap folder
-mv "${CHAIN_FOLDER}/${COIN}-bootstrap.*" "${STAGING_FOLDER}"
+mv "${CHAIN_FOLDER}/${COIN}-bootstrap.tar.gz" "${CHAIN_FOLDER}/${COIN}-bootstrap.zip" "${STAGING_FOLDER}"
 
 ## Creating checksum files
 cd "${STAGING_FOLDER}"
