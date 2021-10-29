@@ -23,6 +23,10 @@ After staging the page, it will move the current bootstrap web folder to `last.<
  - The VerusID signing the bootstrap must be in the local wallet for the chain and have ability to transact.
  - `jq` installed.
  - `zip` installed.
+ - `CURL` installed.
+ - `BC` installed.
+ - `TR` installed.
+
  - A running webserver to host the webpage and bootstrap files.
 
 ## Usage:
@@ -36,14 +40,17 @@ Supply a `<CoinTicker>.png` in the `img` folder for a logo on the page.
 If no command line argument is entered, the script will exit.
 
 ## ToDo:
- - Add explorer URL for blockheight and blockhash to <coin>.json and adapt script for it.
- - Add boolean for external explorer checking to <COIN>.json
+ - Add in option to do a genesis sync periodically.
  - Continued testing on VRSCTEST PBaaS chains.
  - Make new templates in line with the Verus website style.
  - Whatever else springs to mind.
 
 
 ## Changes:
+ - 2021-10-29; Make external checks optional for every coin.
+ - 2021-10-29; Added explorer link to the json files, to allow checking chain validity against an external source, before proceeding.
+ - 2021-10-29; Added further sanity checks.
+ - 2021-10-29; removed execution permissions from files that are not executable.
  - 2021-10-15; Check if chain is running at start of script. If not running, the script will exit.
  - 2021-10-15; Check hash of local bestblock against hash of same block on explorer.verus.io (checking on fork). Script will exit if not identical (VRSC main chain only)
  - 2021-10-15; Check blockheight against explorer.verus.io and wait until the local daemon is synchronized with the explorer. (VSC main chain only)

@@ -12,6 +12,8 @@
   "reindex": true,
   "sign": true,
   "archive": true,
+  "fork_check": true,
+  "explorer_api": "https://explorer.verus.io/api",
   "links":[
     {
       "tag": "Website",

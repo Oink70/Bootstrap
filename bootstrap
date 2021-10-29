@@ -82,6 +82,10 @@ SIGNEE=$(${JQ} .signee "${SCRIPT_DIR}/${FILE}.json")
 REINDEX=$(${JQ} .reindex "${SCRIPT_DIR}/${FILE}.json")
 SIGN=$(${JQ} .sign "${SCRIPT_DIR}/${FILE}.json")
 ARCHIVE=$(${JQ} .archive "${SCRIPT_DIR}/${FILE}.json")
+FORK_CHECK=$(${JQ} .fork_check "${SCRIPT_DIR}/${FILE}.json")
+if [ "$FORK_CHECK" == "true" ]; then
+	EXPLORER=$(${JQ} .explorer_api "${SCRIPT_DIR}/${FILE}.json")
+fi
 
 ## Create staging folder (delete if it exists)
 if [[ -d "${STAGING_FOLDER}" ]]
@@ -105,12 +109,12 @@ fi
 ## Currently only supported for the main VRSC chain, if any other chain is specified
 ## These tests will be bypassed. Checking requires public block explorers available.
 
-if [ "$COIN" == "VRSC" ]; then
+if [ "$FORK_CHECK" == "true" ]; then
   CHECK_STATUS="UNKNOWN"
   while [[ ! "$CHECK_STATUS" == "OK" ]]; do
     # collect data
     HEIGHT_LOCAL=$(su -c "${RPC_CLIENT} -chain=${COIN} -datadir=${CHAIN_FOLDER} getinfo | ${JQ} .blocks" "${DAEMON_USER}")
-    HEIGHT_REMOTE=$(${CURL} --silent https://explorer.verus.io/api/getblockcount)
+    HEIGHT_REMOTE=$(${CURL} --silent ${EXPLORER}/getblockcount)
     HEIGHT_DISTANCE=$(echo "${HEIGHT_LOCAL}-${HEIGHT_REMOTE}" | ${BC} | ${TR} -d -)
     # determine status
     # either output empty = unknown
@@ -138,8 +142,8 @@ if [ "$COIN" == "VRSC" ]; then
   while [[ ! "$CHECK_STATUS" == "OK" ]]; do
     # collect data
     HASH_LOCAL=$(su -c "${RPC_CLIENT} -chain=${COIN} -datadir=${CHAIN_FOLDER} getbestblockhash" "${DAEMON_USER}")
-    HEIGHT_REMOTE=$(${CURL} --silent "https://explorer.verus.io/api/getblockcount")
-    HASH_REMOTE=$(${CURL} --silent "https://explorer.verus.io/api/getblockhash?index=${HEIGHT_REMOTE}" | ${JQ} -r .)
+	HEIGHT_REMOTE=$(${CURL} --silent "${EXPLORER}/getblockcount")
+	HASH_REMOTE=$(${CURL} --silent "${EXPLORER}/getblockhash?index=${HEIGHT_REMOTE}" | ${JQ} -r .)
 
     # determine status
     # either output empty = unknown

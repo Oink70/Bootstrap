@@ -12,6 +12,8 @@
   "reindex": false,
   "sign": false,
   "archive": true,
+  "fork_check": true,
+  "explorer_api": "https://testex.verus.io/api",
   "links":[
     {
       "tag": "Website",
