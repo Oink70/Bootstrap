@@ -1,5 +1,5 @@
 # Bootstrap
-Script to automate the bootstrap creation for Verus, Verus Testnet and (future) PBaaS chains
+Script to automate the bootstrap creation for Verus, Verus Testnet and (near future) PBaaS chains. Likely usable for most BTC or Zcash descendant chains.
 
 ## Description:
 This script creates bootstrap archives from the locally running chain in tar.gz and zip format.
@@ -29,24 +29,81 @@ After staging the page, it will move the current bootstrap web folder to `last.<
 
  - A running webserver to host the webpage and bootstrap files.
 
+## Configuration
+The `<CoinTicker>.json` must be present in the same folder as the `bootstrap` script. Configure your own `<CoinTicker>.json` and fill with the required information. The entered values are case sensitive and paths are absolute paths.
+Values in the json:
+```json
+{
+  "coin": "VRSC",                                                 // (Mandatory) The genarlly accepted cointicker
+  "coin_name": "Verus",                                           // (Mandatory) The name for the chain
+  "daemon_user": "verus",                                         // (Mandatory) The linux user that is running the coin daemon
+  "daemon": "/home/verus/bin/verusd",                             // (Mandatory) The complete path to (and including) the coindeamon
+  "rpc_client": "/home/verus/bin/verus",                          // (Mandatory) The complete path to (and including) the RPC client
+  "chain_folder": "/home/verus/.komodo/VRSC",                     // (Mandatory) The complate path to the chain data
+  "template_folder": "/root/bin/bootstrap/bootstrap.template",    // (Mandatory) The complete path to the template for the website
+  "staging_folder": "/tmp/bootstrap",                             // (Mandatory) The complete path to the temporary staging folder
+  "web_root": "/var/www/html",                                    // (Mandatory) The complete path to the webroot of the webserver
+  "fork_check": true,                                             // (Boolean)   If true do external checks to the link supplied in "explorer_api"
+  "explorer_api": "https://explorer.verus.io/api",                // (Mandatory when "fork_check": true) URL to the external API endpoint
+  "sign": true,                                                   // (Boolean)   Whether to sign the archive with a VerusID
+  "signee": "Verus Coin Foundation Bootstrap@",                   // (Mandatory when "sign": true) The ID on the chain to sign
+  "reindex": false,                                               // (Boolean)   When true, the chain will reindex after bootstrap creation.
+                                                                  //             This value is overridden by "resync": true
+  "resync": true,                                                 // (Boolean)   Synchronize the chain from genesis after bootstrap generation
+  "resync_day": "daily",                                          // (integer or text) Text "daily" will trigger a resync on any weekday
+                                                                  //                   Number 0-6 will trigger the resync ONLY on that weekday
+                                                                  //                   0=Sunday, 1=Monday, ... , 6=Saturday
+  "archive": false,                                               // (Boolean)   After finishing bootstrap, create a "COIN-bootstrap.tar" in the standard webfolder
+  "links":[                                                       // Optional:   "tag" and "URL" pairs included in the bootstrap webpage
+    {
+      "tag": "Website",
+      "URL": "https://verus.io"
+    },
+    {
+      "tag": "Github",
+      "URL": "https://github.com/veruscoin"
+    },
+    {
+      "tag": "Bitcointalk",
+      "URL": "https://bitcointalk.org/index.php?topic=4070404.0"
+    },
+    {
+      "tag": "Discord",
+      "URL": "https://verus.io/discord"
+    },
+    {
+      "tag": "Explorer",
+      "URL": "https://explorer.verus.io"
+    }
+  ]
+
+}
+
+```
+The bootstrap webpage will be in a generated <COIN>-bootstrap folder in the supplied webroot
+Supply a `<CoinTicker>.png` in the `img` folder for a coin logo on the page.
+
 ## Usage:
 `./bootstrap <Cointicker>`
-
 The script must be run as `root`, or as another account that can run commands as the user account which runs the coin daemon(s), without a password.
-
-The `<CoinTicker>.json` must be present in the same folder as the `bootstrap` script. Configure your own `<CoinTicker>.json` and fill with the required information. The entered values are case sensitive and paths are absolute paths.
-
-Supply a `<CoinTicker>.png` in the `img` folder for a logo on the page.
 If no command line argument is entered, the script will exit.
 
 ## ToDo:
- - Add in option to do a genesis sync periodically.
- - Continued testing on VRSCTEST PBaaS chains.
+ - Add option to verify the last x blocks if reindex and resync is inactive.
+ - Add info on webpage on *Genesis synchronized*, *Reindexed*, or *x blocks checked*
+ - Continued testing on VRSCTEST PBaaS chains (current version is only thoroughly tested at mainnet).
  - Make new templates in line with the Verus website style.
+ - Make zip and tarball optional, defaulting to tarball.
  - Whatever else springs to mind.
 
 
 ## Changes:
+ - 2021-11-22; Added explanation concerning the values in the `<COINTICKER>.json` in the README.md
+ - 2021-11-22; Added daily genesis synchronization capabilities.
+ - 2021-11-20; Added checks on the validity of the data specified in the `<COIN>.json` to ensure that files, folders and user exist.
+ - 2021-11-20; Refactored the `su` commands, making then uniform accross platforms.
+ - 2021-11-20; added extra fields in the example`VRSC.json` to accommodate a *ReSync* option.
+ - 2021-11-20; Added the option to do a weekly Resync from genesis on a specific day (0=Sunday... 6=Saturday, or "daily" for every day). This option will override the Reindex option for that day.
  - 2021-10-29; Make external checks optional for every coin.
  - 2021-10-29; Added explorer link to the json files, to allow checking chain validity against an external source, before proceeding.
  - 2021-10-29; Added further sanity checks.

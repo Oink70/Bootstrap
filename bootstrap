@@ -84,19 +84,67 @@ SIGN=$(${JQ} .sign "${SCRIPT_DIR}/${FILE}.json")
 ARCHIVE=$(${JQ} .archive "${SCRIPT_DIR}/${FILE}.json")
 FORK_CHECK=$(${JQ} .fork_check "${SCRIPT_DIR}/${FILE}.json")
 if [ "$FORK_CHECK" == "true" ]; then
-	EXPLORER=$(${JQ} .explorer_api "${SCRIPT_DIR}/${FILE}.json")
+	EXPLORER=$(${JQ} -r .explorer_api "${SCRIPT_DIR}/${FILE}.json")
 fi
+RESYNC=$(${JQ} .resync "${SCRIPT_DIR}/${FILE}.json")
+if [ "$RESYNC"  == "true" ]; then
+    DOW=$(${JQ} -r .resync_day "${SCRIPT_DIR}/${FILE}.json")
+	if [ "$DOW" == "$(date +%u)" ] || [ "$DOW" == "daily" ] ; then
+        REINDEX="false"
+	else
+	    RESYNC="false"
+	fi
+fi	
 
-## Create staging folder (delete if it exists)
+## Sanity checks
+# Does the user in the json exist?
+if id -u "${DAEMON_USER}" >/dev/null 2>&1; then
+  echo "\"daemon_user\": \"${DAEMON_USER}\" specified in ${SCRIPT_DIR}/${FILE}.json exists."
+else
+  echo "\"daemon_user\": \"${DAEMON_USER}\" specified in ${SCRIPT_DIR}/${FILE}.json DOES NOT EXIST."
+  exit 1
+fi
+# Does the daemon in the json exist?
+if [[ -f "${DAEMON}" ]]; then
+  echo "\"daemon\": \"${DAEMON}\" specified in ${SCRIPT_DIR}/${FILE}.json exists."
+else
+  echo "\"daemon\": \"${DAEMON}\" specified in ${SCRIPT_DIR}/${FILE}.json DOES NOT EXIST."
+  exit 1
+fi
+# Does the RPC-client in the json exist?
+if [[ -f "${RPC_CLIENT}" ]]; then
+  echo "\"rpc_client\": \"${RPC_CLIENT}\" specified in ${SCRIPT_DIR}/${FILE}.json exists."
+else
+  echo "\"rpc_client\": \"${RPC_CLIENT}\" specified in ${SCRIPT_DIR}/${FILE}.json DOES NOT EXIST."
+  exit 1
+fi
+# Does the template folder in the json exist?
+if [[ -d "${TEMPLATE_FOLDER}" ]]; then
+  echo "\"template_folder\": \"${TEMPLATE_FOLDER}\" specified in ${SCRIPT_DIR}/${FILE}.json exists."
+else
+  echo "\"template_folder\": \"${TEMPLATE_FOLDER}\" specified in ${SCRIPT_DIR}/${FILE}.json DOES NOT EXIST."
+  exit 1
+fi
+# Does the staging folder in the json already exit? (delete if it exists)
 if [[ -d "${STAGING_FOLDER}" ]]
 then
     rm -rf "${STAGING_FOLDER}"
 fi
+# Does the webroot folder in the json exist?
+if [[ -d "${WEB_ROOT}" ]]; then
+  echo "\"web_root\": \"${WEB_ROOT}\" specified in ${SCRIPT_DIR}/${FILE}.json exists."
+else
+  echo "\"web_root\": \"${WEB_ROOT}\" specified in ${SCRIPT_DIR}/${FILE}.json DOES NOT EXIST."
+  exit 1
+fi
+## end of sanity checks
+
 cp -r "${TEMPLATE_FOLDER}" "${STAGING_FOLDER}"
+
 
 ## Check if the daemon is running. If not exit, otherwise continue
 dstat=0
-count=$(su -c "${RPC_CLIENT} -chain=${COIN} -datadir=${CHAIN_FOLDER} getconnectioncount" "${DAEMON_USER}")
+count=$(su "${DAEMON_USER}" -c "${RPC_CLIENT} -chain=${COIN} -datadir=${CHAIN_FOLDER} getconnectioncount")
 case $count in
     ''|*[!0-9]*) dstat=0 ;;
     *) dstat=1 ;;
@@ -113,7 +161,7 @@ if [ "$FORK_CHECK" == "true" ]; then
   CHECK_STATUS="UNKNOWN"
   while [[ ! "$CHECK_STATUS" == "OK" ]]; do
     # collect data
-    HEIGHT_LOCAL=$(su -c "${RPC_CLIENT} -chain=${COIN} -datadir=${CHAIN_FOLDER} getinfo | ${JQ} .blocks" "${DAEMON_USER}")
+    HEIGHT_LOCAL=$(su "${DAEMON_USER}" -c "${RPC_CLIENT} -chain=${COIN} -datadir=${CHAIN_FOLDER} getinfo | ${JQ} .blocks")
     HEIGHT_REMOTE=$(${CURL} --silent ${EXPLORER}/getblockcount)
     HEIGHT_DISTANCE=$(echo "${HEIGHT_LOCAL}-${HEIGHT_REMOTE}" | ${BC} | ${TR} -d -)
     # determine status
@@ -141,7 +189,7 @@ if [ "$FORK_CHECK" == "true" ]; then
   CHECK_STATUS="UNKNOWN"
   while [[ ! "$CHECK_STATUS" == "OK" ]]; do
     # collect data
-    HASH_LOCAL=$(su -c "${RPC_CLIENT} -chain=${COIN} -datadir=${CHAIN_FOLDER} getbestblockhash" "${DAEMON_USER}")
+    HASH_LOCAL=$(su "${DAEMON_USER}" -c "${RPC_CLIENT} -chain=${COIN} -datadir=${CHAIN_FOLDER} getbestblockhash")
 	HEIGHT_REMOTE=$(${CURL} --silent "${EXPLORER}/getblockcount")
 	HASH_REMOTE=$(${CURL} --silent "${EXPLORER}/getblockhash?index=${HEIGHT_REMOTE}" | ${JQ} -r .)
 
@@ -173,7 +221,7 @@ echo "    \"bootstrap_types\": \"tar.gz zip\"" | tee -a "${STAGING_FOLDER}/${COI
 echo '}' | tee -a "${STAGING_FOLDER}/${COIN}.json"
 
 ## Stopping daemon
-su -c "${RPC_CLIENT}  -chain=${COIN} -datadir=${CHAIN_FOLDER} stop" "${DAEMON_USER}"
+su "${DAEMON_USER}" -c "${RPC_CLIENT} -chain=${COIN} -datadir=${CHAIN_FOLDER} stop"
 
 ## Monitoring if the daemon is still running, before continuing
 while ps -u "${DAEMON_USER}" x | grep "${DAEMON}" | grep "${CHAIN_FOLDER}\ "; do
@@ -186,8 +234,11 @@ tar -czvf "${COIN}-bootstrap.tar.gz" blocks chainstate
 ${ZIP} -r "${COIN}-bootstrap.zip"  blocks chainstate
 
 
-## Starting daemon back up
-su -c "cd ${CHAIN_FOLDER} && ${DAEMON}  -chain=${COIN} -datadir=${CHAIN_FOLDER} -daemon 1>/dev/null 2>&1" "${DAEMON_USER}"
+## Starting daemon back up if signing is required or reindex or rescan is false
+if [[ ( "${SIGN}" == "true" ) || (( "${REINDEX}" == "false" ) && ( "${RESYNC}" == "false" )) ]]
+then
+  su "${DAEMON_USER}" -c "cd ${CHAIN_FOLDER} && ${DAEMON} -chain=${COIN} -datadir=${CHAIN_FOLDER} -daemon 1>/dev/null 2>&1"
+fi
 
 ## Moving bootstrap archives to bootstrap folder
 mv "${CHAIN_FOLDER}/${COIN}-bootstrap.tar.gz" "${CHAIN_FOLDER}/${COIN}-bootstrap.zip" "${STAGING_FOLDER}"
@@ -202,28 +253,28 @@ md5sum -b "${COIN}-bootstrap.zip" >"${COIN}-bootstrap.zip.md5sum"
 sha256sum -b "${COIN}-bootstrap.zip" >"${COIN}-bootstrap.zip.sha256sum"
 sha512sum -b "${COIN}-bootstrap.zip" >"${COIN}-bootstrap.zip.sha512sum"
 
-## Check if the daemon is started in a loop
-## If false wait 15 seconds and repeat loop
-## If true proceed to signing the archives
-dstat=0
-until [ $dstat == 1 ]; do
-  count=$("${RPC_CLIENT}" -datadir="${CHAIN_FOLDER}" getconnectioncount)
-  case $count in
-    ''|*[!0-9]*) dstat=0
-       sleep 15s ;;
-    *) dstat=1 ;;
-  esac
-done
-
 ## check if signature creating is enabled and create VerusID signatures
 if "${SIGN}"
 then
-  bash -c "${RPC_CLIENT}  -chain=${COIN} -datadir=${CHAIN_FOLDER} signfile ${SIGNEE} ${STAGING_FOLDER}/${COIN}-bootstrap.tar.gz" > "${STAGING_FOLDER}/${COIN}-bootstrap.tar.gz.tmp"
+  ## Check if the daemon is started in a loop
+  ## If false wait 15 seconds and repeat loop
+  ## If true proceed to signing the archives
+  dstat=0
+  until [ $dstat == 1 ]; do
+    count=$(su "${DAEMON_USER}" -c "${RPC_CLIENT} -chain=${COIN} -datadir=${CHAIN_FOLDER} getconnectioncount")
+    case $count in
+      ''|*[!0-9]*) dstat=0
+         sleep 15s ;;
+      *) dstat=1 ;;
+    esac
+  done
+
+  bash -c "${RPC_CLIENT} -chain=${COIN} -datadir=${CHAIN_FOLDER} signfile ${SIGNEE} ${STAGING_FOLDER}/${COIN}-bootstrap.tar.gz" > "${STAGING_FOLDER}/${COIN}-bootstrap.tar.gz.tmp"
   if [[ -f "${STAGING_FOLDER}/${COIN}-bootstrap.tar.gz.tmp" ]]
   then
       { head -n 1 "${STAGING_FOLDER}/${COIN}-bootstrap.tar.gz.tmp"; echo "  \"signee\": ${SIGNEE},"; tail -n +2 "${STAGING_FOLDER}/${COIN}-bootstrap.tar.gz.tmp"; } > "${STAGING_FOLDER}/${COIN}-bootstrap.tar.gz.verusid"
   fi
-  bash -c "${RPC_CLIENT}  -chain=${COIN} -datadir=${CHAIN_FOLDER} signfile ${SIGNEE} ${STAGING_FOLDER}/${COIN}-bootstrap.zip"> "${STAGING_FOLDER}/${COIN}-bootstrap.zip.tmp"
+  bash -c "${RPC_CLIENT} -chain=${COIN} -datadir=${CHAIN_FOLDER} signfile ${SIGNEE} ${STAGING_FOLDER}/${COIN}-bootstrap.zip"> "${STAGING_FOLDER}/${COIN}-bootstrap.zip.tmp"
   if [[ -f "${STAGING_FOLDER}/${COIN}-bootstrap.zip.tmp" ]]
   then
     { head -n 1 "${STAGING_FOLDER}/${COIN}-bootstrap.zip.tmp"; echo "  \"signee\": ${SIGNEE},"; tail -n +2 "${STAGING_FOLDER}/${COIN}-bootstrap.zip.tmp"; } > "${STAGING_FOLDER}/${COIN}-bootstrap.zip.verusid"
@@ -235,16 +286,44 @@ fi
 if [[ "${REINDEX}" == "false" ]]
 then
   ## Reindex is disabled
-  sleep 1s
+  sleep 0.1s
 else
   ## Stopping daemon
-  su -c "${RPC_CLIENT} -chain=${COIN} -datadir=${CHAIN_FOLDER} stop" "${DAEMON_USER}"
+  su "${DAEMON_USER}" -c "${RPC_CLIENT} -chain=${COIN} -datadir=${CHAIN_FOLDER} stop"
   ## Monitoring if the daemon is still running, before continuing
   while ps -u "${DAEMON_USER}" x | grep "${DAEMON}" | grep "${CHAIN_FOLDER}\ "; do
     sleep 2s
   done
   ## Starting daemon back up with -reindex
-  su -c "cd ${CHAIN_FOLDER} && ${DAEMON} -chain=${COIN} -datadir=${CHAIN_FOLDER} -reindex -daemon 1>/dev/null 2>&1" "${DAEMON_USER}"
+  su "${DAEMON_USER}" -c "cd ${CHAIN_FOLDER} && ${DAEMON} -chain=${COIN} -datadir=${CHAIN_FOLDER} -reindex -daemon 1>/dev/null 2>&1"
+fi
+
+## depending on the value of $RESYNC, stop the chain, clear current chain folder and start it.
+if [[ "${RESYNC}" == "false" ]]; then
+  ## Resync is not active
+  sleep 01.s
+else
+  ## Stopping daemon
+  su "${DAEMON_USER}" -c "${RPC_CLIENT} -chain=${COIN} -datadir=${CHAIN_FOLDER} stop"
+  ## Monitoring if the daemon is still running, before continuing
+  while ps -u "${DAEMON_USER}" x | grep "${DAEMON}" | grep "${CHAIN_FOLDER}\ "; do
+    sleep 2s
+  done
+  ## Clear files out of chain folder
+  if [[ -d "${CHAIN_FOLDER}/blocks" ]]; then rm -rf "${CHAIN_FOLDER}/blocks"; fi
+  if [[ -d "${CHAIN_FOLDER}/chainstate" ]]; then rm -rf "${CHAIN_FOLDER}/chainstate"; fi
+  if [[ -d "${CHAIN_FOLDER}/database" ]]; then rm -rf "${CHAIN_FOLDER}/database"; fi
+  if [[ -d "${CHAIN_FOLDER}/notarisations" ]]; then rm -rf "${CHAIN_FOLDER}/notarisations"; fi
+  if [[ -f "${CHAIN_FOLDER}/db.log" ]]; then rm -f "${CHAIN_FOLDER}/db.log"; fi
+  if [[ -f "${CHAIN_FOLDER}/fee_estimates.dat" ]]; then rm -f "${CHAIN_FOLDER}/fee_estimates.dat"; fi
+  if [[ -f "${CHAIN_FOLDER}/komodostate" ]]; then rm -f "${CHAIN_FOLDER}/komodostate"; fi
+  if [[ -f "${CHAIN_FOLDER}/komodostate.ind" ]]; then rm -f "${CHAIN_FOLDER}/komodostate.ind"; fi
+  if [[ -f "${CHAIN_FOLDER}/.lock" ]]; then rm -f "${CHAIN_FOLDER}/.lock"; fi
+  if [[ -f "${CHAIN_FOLDER}/peers.dat" ]]; then rm -f "${CHAIN_FOLDER}/peers.dat"; fi
+  if [[ -f "${CHAIN_FOLDER}/signedmasks" ]]; then rm -f "${CHAIN_FOLDER}/signedmasks"; fi
+  if [[ -f "${CHAIN_FOLDER}/verus.pid" ]]; then rm -f "${CHAIN_FOLDER}/verus.pid"; fi
+  ## Starting daemon back up
+  su "${DAEMON_USER}" -c "cd ${CHAIN_FOLDER} && ${DAEMON} -chain=${COIN} -datadir=${CHAIN_FOLDER} -daemon 1>/dev/null 2>&1"
 fi
 
 ## Collect data about the bootstrap (recorded at daemon shutdown, filesizes read directly from files)

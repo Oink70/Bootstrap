@@ -14,6 +14,8 @@
   "archive": true,
   "fork_check": true,
   "explorer_api": "https://testex.verus.io/api",
+  "resync": true,
+  "resync_day": 0,
   "links":[
     {
       "tag": "Website",
