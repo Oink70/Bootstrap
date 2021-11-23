@@ -98,7 +98,8 @@ If no command line argument is entered, the script will exit.
 
 
 ## Changes:
- - 2021-11-23; "Made links to block and hash controlled by json data, instead of fixed to `https://explorer.verus.io`
+ - 2021-11-23; Prevented edge case where for checks fail if new blocks arrive while checking.
+ - 2021-11-23; Made links to block and hash controlled by json data, instead of fixed to `https://explorer.verus.io`
  - 2021-11-23; clarified documentation on daemon and rpc-client.
  - 2021-11-22; Added explanation concerning the values in the `<COINTICKER>.json` in the README.md
  - 2021-11-22; Added daily genesis synchronization capabilities.
