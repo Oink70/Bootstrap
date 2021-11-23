@@ -190,8 +190,8 @@ if [ "$FORK_CHECK" == "true" ]; then
   while [[ ! "$CHECK_STATUS" == "OK" ]]; do
     # collect data
     HASH_LOCAL=$(su "${DAEMON_USER}" -c "${RPC_CLIENT} -chain=${COIN} -datadir=${CHAIN_FOLDER} getbestblockhash")
-	HEIGHT_REMOTE=$(${CURL} --silent "${EXPLORER}/api/getblockcount")
-	HASH_REMOTE=$(${CURL} --silent "${EXPLORER}/api/getblockhash?index=${HEIGHT_REMOTE}" | ${JQ} -r .)
+	HEIGHT_LOCAL=$(su "${DAEMON_USER}" -c "${RPC_CLIENT} -chain=${COIN} -datadir=${CHAIN_FOLDER} getblock ${HASH_LOCAL} 1 | jq -r .height")
+	HASH_REMOTE=$(${CURL} --silent "${EXPLORER}/api/getblockhash?index=${HEIGHT_LOCAL}" | ${JQ} -r .)
 
     # determine status
     # either output empty = unknown
