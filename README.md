@@ -46,8 +46,8 @@ Values in the json:
   "template_folder": "/root/bin/bootstrap/bootstrap.template",    // (Mandatory) The complete path to the template for the website
   "staging_folder": "/tmp/bootstrap",                             // (Mandatory) The complete path to the temporary staging folder
   "web_root": "/var/www/html",                                    // (Mandatory) The complete path to the webroot of the webserver
-  "fork_check": true,                                             // (Boolean)   If true do external checks to the link supplied in "explorer_api"
-  "explorer_api": "https://explorer.verus.io/api",                // (Mandatory when "fork_check": true) URL to the external API endpoint
+  "fork_check": true,                                             // (Boolean)   If true do external checks to the link supplied in "explorer_url"
+  "explorer_url": "https://explorer.verus.io/api",                // (Mandatory when "fork_check": true) URL to the external blockchain explorer, used for fork checking and block- and hash-links on the site.
   "sign": true,                                                   // (Boolean)   Whether to sign the archive with a VerusID
   "signee": "Verus Coin Foundation Bootstrap@",                   // (Mandatory when "sign": true) The ID on the chain to sign
   "reindex": false,                                               // (Boolean)   When true, the chain will reindex after bootstrap creation.
