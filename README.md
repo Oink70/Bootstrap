@@ -37,8 +37,8 @@ Values in the json:
   "coin": "VRSC",                                                 // (Mandatory) The genarlly accepted cointicker
   "coin_name": "Verus",                                           // (Mandatory) The name for the chain
   "daemon_user": "verus",                                         // (Mandatory) The linux user that is running the coin daemon
-  "daemon": "/home/verus/bin/verusd",                             // (Mandatory) The complete path to (and including) the coindeamon
-  "rpc_client": "/home/verus/bin/verus",                          // (Mandatory) The complete path to (and including) the RPC client
+  "daemon": "/home/verus/bin/verusd",                             // (Mandatory) The complete path to (and including) the coindeamon, DO NOT ADD ANY PARAMETERS
+  "rpc_client": "/home/verus/bin/verus",                          // (Mandatory) The complete path to (and including) the RPC client, DO NOT ADD ANY PARAMETERS
   "chain_folder": "/home/verus/.komodo/VRSC",                     // (Mandatory) The complate path to the chain data
   "template_folder": "/root/bin/bootstrap/bootstrap.template",    // (Mandatory) The complete path to the template for the website
   "staging_folder": "/tmp/bootstrap",                             // (Mandatory) The complete path to the temporary staging folder
