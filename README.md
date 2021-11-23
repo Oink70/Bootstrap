@@ -1,6 +1,9 @@
 # Bootstrap
 Script to automate the bootstrap creation for Verus, Verus Testnet and (near future) PBaaS chains. Likely usable for most BTC or Zcash descendant chains.
 
+This script is currently in use to produce the Verus bootstrap and is tested on Devuan BeoWulf, Debian Bullseye and Ubuntu Focal Fossa.
+Tested chains: VRSC, VRSCTEST.
+
 ## Description:
 This script creates bootstrap archives from the locally running chain in tar.gz and zip format.
 
@@ -91,7 +94,7 @@ If no command line argument is entered, the script will exit.
 ## ToDo:
  - Add option to verify the last x blocks if reindex and resync is inactive.
  - Add info on webpage on *Genesis synchronized*, *Reindexed*, or *x blocks checked*
- - Continued testing on VRSCTEST PBaaS chains (current version is only thoroughly tested at mainnet).
+ - Continued testing on VRSCTEST PBaaS chains (current version is only thoroughly tested at VRSC en VRSCTEST).
  - Make new templates in line with the Verus website style.
  - Make zip and tarball optional, defaulting to tarball.
  - Whatever else springs to mind.
@@ -129,3 +132,10 @@ If no command line argument is entered, the script will exit.
  - 2021-05-24; added `-rf` to `rm last.-bootstrap`
  - 2021-05-18; Add `-datadir` to daemon calls
  - 2021-05-17; Initial commit
+
+## DISCLAIMER
+Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
+
+The above copyright notices and this permission notice shall be included in all copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
