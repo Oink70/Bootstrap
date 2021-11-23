@@ -84,7 +84,7 @@ SIGN=$(${JQ} .sign "${SCRIPT_DIR}/${FILE}.json")
 ARCHIVE=$(${JQ} .archive "${SCRIPT_DIR}/${FILE}.json")
 FORK_CHECK=$(${JQ} .fork_check "${SCRIPT_DIR}/${FILE}.json")
 if [ "$FORK_CHECK" == "true" ]; then
-	EXPLORER=$(${JQ} -r .explorer_api "${SCRIPT_DIR}/${FILE}.json")
+	EXPLORER=$(${JQ} -r .explorer_url "${SCRIPT_DIR}/${FILE}.json")
 fi
 RESYNC=$(${JQ} .resync "${SCRIPT_DIR}/${FILE}.json")
 if [ "$RESYNC"  == "true" ]; then
@@ -162,7 +162,7 @@ if [ "$FORK_CHECK" == "true" ]; then
   while [[ ! "$CHECK_STATUS" == "OK" ]]; do
     # collect data
     HEIGHT_LOCAL=$(su "${DAEMON_USER}" -c "${RPC_CLIENT} -chain=${COIN} -datadir=${CHAIN_FOLDER} getinfo | ${JQ} .blocks")
-    HEIGHT_REMOTE=$(${CURL} --silent ${EXPLORER}/getblockcount)
+    HEIGHT_REMOTE=$(${CURL} --silent ${EXPLORER}/api/getblockcount)
     HEIGHT_DISTANCE=$(echo "${HEIGHT_LOCAL}-${HEIGHT_REMOTE}" | ${BC} | ${TR} -d -)
     # determine status
     # either output empty = unknown
@@ -190,8 +190,8 @@ if [ "$FORK_CHECK" == "true" ]; then
   while [[ ! "$CHECK_STATUS" == "OK" ]]; do
     # collect data
     HASH_LOCAL=$(su "${DAEMON_USER}" -c "${RPC_CLIENT} -chain=${COIN} -datadir=${CHAIN_FOLDER} getbestblockhash")
-	HEIGHT_REMOTE=$(${CURL} --silent "${EXPLORER}/getblockcount")
-	HASH_REMOTE=$(${CURL} --silent "${EXPLORER}/getblockhash?index=${HEIGHT_REMOTE}" | ${JQ} -r .)
+	HEIGHT_REMOTE=$(${CURL} --silent "${EXPLORER}/api/getblockcount")
+	HASH_REMOTE=$(${CURL} --silent "${EXPLORER}/api/getblockhash?index=${HEIGHT_REMOTE}" | ${JQ} -r .)
 
     # determine status
     # either output empty = unknown
@@ -344,6 +344,7 @@ then
 fi
 
 ## replace placeholders for values with recorded values
+sed -i "s~%%EXPLORER_URL%%~${EXPLORER}~gip" "${STAGING_FOLDER}/${COIN}.html"
 sed -i "s/%%BOOTSTRAP_TIMESTAMP%%/${BOOTSTRAP_TIMESTAMP}/gip" "${STAGING_FOLDER}/${COIN}.html"
 sed -i "s/%%BOOTSTRAP_BESTBLOCKHASH%%/${BOOTSTRAP_BESTBLOCKHASH}/gip" "${STAGING_FOLDER}/${COIN}.html"
 sed -i "s/%%BOOTSTRAP_HEIGHT%%/${BOOTSTRAP_HEIGHT}/gip" "${STAGING_FOLDER}/${COIN}.html"

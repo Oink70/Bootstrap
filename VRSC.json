@@ -14,7 +14,7 @@
   "archive": false,
   "fork_check": true,
   "resync": true,
-  "explorer_api": "https://explorer.verus.io/api",
+  "explorer_url": "https://explorer.verus.io",
   "resync_day": "daily",
   "links":[
     {
