@@ -214,9 +214,12 @@ fi
 
 echo "{" | tee $STAGING_FOLDER/$COIN.json
 echo "  \"coin\": \"${COIN}\"," | tee -a "${STAGING_FOLDER}/${COIN}.json"
-echo "  \"bootstrap_timestamp\": \"$(${RPC_CLIENT}  -chain=${COIN} -datadir=${CHAIN_FOLDER} getblock $(${RPC_CLIENT}  -chain=${COIN} -datadir=${CHAIN_FOLDER} getblockcount) 1 | jq -r .time)\"," | tee -a "${STAGING_FOLDER}/${COIN}.json"
-echo "  \"bootstrap_height\": \"$(${RPC_CLIENT} -chain=${COIN} -datadir=${CHAIN_FOLDER} getblockcount)\"," | tee -a "${STAGING_FOLDER}/${COIN}.json"
-echo "  \"bootstrap_bestblockhash\": \"$(${RPC_CLIENT}  -chain=${COIN} -datadir=${CHAIN_FOLDER} getblockhash $(${RPC_CLIENT}  -chain=${COIN} -datadir=${CHAIN_FOLDER} getblockcount))\"," | tee -a "${STAGING_FOLDER}/${COIN}.json"
+BOOTSTRAP_BLOCKCOUNT=$(su ${DAEMON_USER} -c "${RPC_CLIENT} -chain=${COIN} getblockcount")
+BOOTSTRAP_TIME=$(su ${DAEMON_USER} -c "${RPC_CLIENT} -chain=${COIN} getblock ${BOOTSTRAP_BLOCKCOUNT} 1 | jq -r .time")
+BOOTSTRAP_BLOCKHASH=$(su ${DAEMON_USER} -c "${RPC_CLIENT}  -chain=${COIN} -datadir=${CHAIN_FOLDER} getblockhash ${BOOTSTRAP_BLOCKCOUNT}")
+echo "  \"bootstrap_timestamp\": \"$BOOTSTRAP_TIME\"," | tee -a "${STAGING_FOLDER}/${COIN}.json"
+echo "  \"bootstrap_height\": \"${BOOTSTRAP_BLOCKCOUNT}\"," | tee -a "${STAGING_FOLDER}/${COIN}.json"
+echo "  \"bootstrap_bestblockhash\": \"${BOOTSTRAP_BLOCKHASH}\"," | tee -a "${STAGING_FOLDER}/${COIN}.json"
 echo "    \"bootstrap_types\": \"tar.gz zip\"" | tee -a "${STAGING_FOLDER}/${COIN}.json"
 echo '}' | tee -a "${STAGING_FOLDER}/${COIN}.json"
 
