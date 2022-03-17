@@ -93,6 +93,8 @@ If no command line argument is entered, the script will exit.
 
 ## ToDo:
  - Add option to verify the last x blocks if reindex and resync is inactive.
+ - Add in manner of sync (full sync from 0, reindex, or continued where it left of) on the web page.
+ - make the sleep periods conditional, based on the wait reason.
  - Add info on webpage on *Genesis synchronized*, *Reindexed*, or *x blocks checked*
  - Continued testing on VRSCTEST PBaaS chains (current version is only thoroughly tested at VRSC en VRSCTEST).
  - Make new templates in line with the Verus website style.
