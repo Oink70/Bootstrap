@@ -92,6 +92,7 @@ The script must be run as `root`, or as another account that can run commands as
 If no command line argument is entered, the script will exit.
 
 ## ToDo:
+ - Put in unified method for folder names, adhering to PBaaS standards.
  - Add option to verify the last x blocks if reindex and resync is inactive.
  - Add in manner of sync (full sync from 0, reindex, or continued where it left of) on the web page.
  - make the sleep periods conditional, based on the wait reason.
@@ -103,6 +104,8 @@ If no command line argument is entered, the script will exit.
 
 
 ## Changes:
+ - 2022-03-17; un-nested commands retrieving current chain status, to improve PBaaS compatibility
+ - 2022-03-17; Added current testnet chain jsons
  - 2021-11-23; Prevented edge case where for checks fail if new blocks arrive while checking.
  - 2021-11-23; Made links to block and hash controlled by json data, instead of fixed to `https://explorer.verus.io`
  - 2021-11-23; clarified documentation on daemon and rpc-client.
