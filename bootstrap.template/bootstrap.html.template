@@ -1,71 +1,71 @@
 <!DOCTYPE html>
 <html lang="en">
-	<head>
-		<meta charset="utf-8">
-		<title>%%COIN_NAME%% Bootstrap Archive</title>
-		<link rel="shortcut icon" type="image/x-icon" href="./img/%%COIN%%.png">
-		<link rel="stylesheet" href="./css/github-markdown-v2.10.0.min.css" />
-		<style type="text/css">
-			code{
-				border: 1px dotted black;
-				background-color: #dddddd !important;
-				padding: 2px !important;
-				margin: 2px !important;
-				display: inline-block;
-			}
-		</style>
-	</head>
-	<body>
-		<article class="markdown-body">
-			<h1>
-				<img width=24 height=24 src="./img/%%COIN%%.png" alt="%%COIN%% Icon">&nbsp;%%COIN_NAME%% Bootstrap Archive
-			</h1>
+  <head>
+    <meta charset="utf-8">
+    <title>%%COIN_NAME%% Bootstrap Archive</title>
+    <link rel="shortcut icon" type="image/x-icon" href="./img/%%WEB_NAME%%.png">
+    <link rel="stylesheet" href="./css/github-markdown-v2.10.0.min.css" />
+    <style type="text/css">
+      code{
+        border: 1px dotted black;
+        background-color: #dddddd !important;
+        padding: 2px !important;
+        margin: 2px !important;
+        display: inline-block;
+      }
+    </style>
+  </head>
+  <body>
+    <article class="markdown-body">
+      <h1>
+        <img width=24 height=24 src="./img/%%WEB_NAME%%.png" alt="%%COIN%% Icon">&nbsp;%%COIN_NAME%% Bootstrap Archive
+      </h1>
+      <p>
+        The archive will be regenerated every 24 hours roughly (see timestamp below). You'll have to unpack the downloaded archive from within the %%COIN%% data directory.
+      </p>
 
-			<p>
-				The archive will be regenerated every 24 hours roughly (see timestamp below). You'll have to unpack the downloaded archive from within the %%COIN%% data directory.
-			</p>
+      <p>
+        <h2>Coin info</h2>
+        <ul>
 
-			<p>
-				<h2>Coin info</h2>
-				<ul>
+        </ul>
 
-				</ul>
+        <h2>Bootstrap info</h2>
+        <ul>
+          <li>Snapshot timestamp: <b>%%BOOTSTRAP_TIMESTAMP%%</b></li>
+          <li>Block height at snapshot: <b><a href="%%EXPLORER_URL%%/block/%%BOOTSTRAP_BESTBLOCKHASH%%" target="_blank">%%BOOTSTRAP_HEIGHT%%</a></b></li>
+          <li>Block hash: <b><a href="%%EXPLORER_URL%%/block/%%BOOTSTRAP_BESTBLOCKHASH%%" target="_blank">%%BOOTSTRAP_BESTBLOCKHASH%%</a></b></li>
+          <li>Currency folder name: <b>%%WEB_NAME%%</b></li>
+          <li>Notes: <i>Unless you can guarantee no incoming transactions occur to your wallet's addresses while it is down to install the bootstrap, it is mandatory that you 'rescan' 
+              the blockchain data. See <a href="https://verus.io/downloads/how-to/how-to_bootstrap.html">the bootstrap howto</a></i></li>
+        </ul>
 
-				<h2>Bootstrap info</h2>
-				<ul>
-					<li>Snapshot timestamp: <b>%%BOOTSTRAP_TIMESTAMP%%</b></li>
-					<li>Block height at snapshot: <b><a href="%%EXPLORER_URL%%/block/%%BOOTSTRAP_BESTBLOCKHASH%%" target="_blank">%%BOOTSTRAP_HEIGHT%%</a></b></li>
-					<li>Block hash: <b><a href="%%EXPLORER_URL%%/block/%%BOOTSTRAP_BESTBLOCKHASH%%" target="_blank">%%BOOTSTRAP_BESTBLOCKHASH%%</a></b></li>
-					<li>Notes: <i>Unless you can guarantee no incoming transactions occur to your wallet's addresses while it is down to install the bootstrap, it is mandatory that you 'rescan' the blockchain data. See <a href="https://verus.io/downloads/how-to/how-to_bootstrap.html">the bootstrap howto</a></i></li>
-				</ul>
-
-				<h2>Download</h2>
-				<ul>
-					<li>Archive: <a href="%%COIN%%-bootstrap.tar.gz" target="_blank">%%COIN%%-bootstrap.tar.gz</a></li>
-					<li>File size: <b>%%TGZ_SIZE%%</b></li>
-					<li>
-						Checksums: <a href="%%COIN%%-bootstrap.tar.gz.md5sum" target="_blank">md5</a>,
-						<a href="%%COIN%%-bootstrap.tar.gz.sha256sum" target="_blank">sha256</a>,
-						<a href="%%COIN%%-bootstrap.tar.gz.sha512sum" target="_blank">sha512</a>
-					</li>
-					<li>Signatures: <a href="%%COIN%%-bootstrap.tar.gz.verusid" target="_blank">signature</a></li>
-				</ul>
-				<ul>
-          <li>Archive: <a href="%%COIN%%-bootstrap.zip" target="_blank">%%COIN%%-bootstrap.zip</a></li>
+        <h2>Download</h2>
+        <ul>
+          <li>Archive: <a href="%%WEB_NAME%%-bootstrap.tar.gz" target="_blank">%%COIN%%-bootstrap.tar.gz</a></li>
+          <li>File size: <b>%%TGZ_SIZE%%</b></li>
+          <li>Checksums: <a href="%%WEB_NAME%%-bootstrap.tar.gz.md5sum" target="_blank">md5</a>,
+          <a href="%%WEB_NAME%%-bootstrap.tar.gz.sha256sum" target="_blank">sha256</a>,
+            <a href="%%WEB_NAME%%-bootstrap.tar.gz.sha512sum" target="_blank">sha512</a>
+          </li>
+          <li>Signatures: <a href="%%WEB_NAME%%-bootstrap.tar.gz.verusid" target="_blank">signature</a></li>
+        </ul>
+        <ul>
+          <li>Archive: <a href="%%WEB_NAME%%-bootstrap.zip" target="_blank">%%COIN%%-bootstrap.zip</a></li>
           <li>File size: <b>%%ZIP_SIZE%%</b></li>
           <li>
-            Checksums: <a href="%%COIN%%-bootstrap.zip.md5sum" target="_blank">md5</a>,
-            <a href="%%COIN%%-bootstrap.zip.sha256sum" target="_blank">sha256</a>,
-            <a href="%%COIN%%-bootstrap.zip.sha512sum" target="_blank">sha512</a>
-					</li>
-					<li>Signatures: <a href="%%COIN%%-bootstrap.zip.verusid" target="_blank">signature</a></li>
-				</ul>
-			</p>
-			<p>
+            Checksums: <a href="%%WEB_NAME%%-bootstrap.zip.md5sum" target="_blank">md5</a>,
+            <a href="%%WEB_NAME%%-bootstrap.zip.sha256sum" target="_blank">sha256</a>,
+            <a href="%%WEB_NAME%%-bootstrap.zip.sha512sum" target="_blank">sha512</a>
+          </li>
+          <li>Signatures: <a href="%%WEB_NAME%%-bootstrap.zip.verusid" target="_blank">signature</a></li>
+        </ul>
+      </p>
+      <p>
         <hr style="border-top: 1px dotted black; width: 666px; padding: 0; height: 0; margin: 0" />
-    	    <font size=1>&copy;2018-2021 <a href="https://verus.io/">verus.io</a>. The bootstrap archives and web pages are generated in Bash. Join us on <a href="https://verus.io/discord" target="_blank">Discord</a> to get in touch.</font>
-			</p>
-		</article>
-	</body>
+        <font size=1>&copy;2018-2022 <a href="https://verus.io/">verus.io</a>. The bootstrap archives and web pages are generated in Bash. Join us on <a href="https://verus.io/discord" target="_blank">Discord</a> to get in touch.</font>
+      </p>
+    </article>
+  </body>
 </html>
 <!--// EOF //-->

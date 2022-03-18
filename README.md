@@ -42,6 +42,7 @@ Values in the json:
   "daemon_user": "verus",                                         // (Mandatory) The linux user that is running the coin daemon
   "daemon": "/home/verus/bin/verusd",                             // (Mandatory) The complete path to (and including) the coindeamon, DO NOT ADD ANY PARAMETERS
   "rpc_client": "/home/verus/bin/verus",                          // (Mandatory) The complete path to (and including) the RPC client, DO NOT ADD ANY PARAMETERS
+  "custom_chain_folder": true|false,                              // (Boolean)   
   "chain_folder": "/home/verus/.komodo/VRSC",                     // (Mandatory) The complate path to the chain data
   "template_folder": "/root/bin/bootstrap/bootstrap.template",    // (Mandatory) The complete path to the template for the website
   "staging_folder": "/tmp/bootstrap",                             // (Mandatory) The complete path to the temporary staging folder
@@ -92,18 +93,21 @@ The script must be run as `root`, or as another account that can run commands as
 If no command line argument is entered, the script will exit.
 
 ## ToDo:
- - Put in unified method for folder names, adhering to PBaaS standards.
- - Add option to verify the last x blocks if reindex and resync is inactive.
- - Add in manner of sync (full sync from 0, reindex, or continued where it left of) on the web page.
+ - fix
+ - Add option to verify the last x blocks if reindex and resync is inactive and supply that info on the webpage.
  - make the sleep periods conditional, based on the wait reason.
- - Add info on webpage on *Genesis synchronized*, *Reindexed*, or *x blocks checked*
- - Continued testing on VRSCTEST PBaaS chains (current version is only thoroughly tested at VRSC en VRSCTEST).
+ - Add info on webpage on *Genesis synchronized* or *Reindexed*.
  - Make new templates in line with the Verus website style.
  - Make zip and tarball optional, defaulting to tarball.
  - Whatever else springs to mind.
 
 
 ## Changes:
+ - 2022-03-18; Added the folder name (hex for PBaaS, clear text for `VRSC` or `vrsctest`) to the website
+ - 2022-03-18; Renamed coin PNG files to the identityhex formatted names.
+ - 2022-03-18; Automatic/Manual chain selection.
+ - 2022-03-18; Automatically retrieve PBaaS identityhex and use it as folder/file names, preventing them to have special characters in them.
+ - 2022-03-18; Added `"custom_chain_folder": true|false,` to coin json.
  - 2022-03-17; un-nested commands retrieving current chain status, to improve PBaaS compatibility
  - 2022-03-17; Added current testnet chain jsons
  - 2021-11-23; Prevented edge case where for checks fail if new blocks arrive while checking.
@@ -113,7 +117,7 @@ If no command line argument is entered, the script will exit.
  - 2021-11-22; Added daily genesis synchronization capabilities.
  - 2021-11-20; Added checks on the validity of the data specified in the `<COIN>.json` to ensure that files, folders and user exist.
  - 2021-11-20; Refactored the `su` commands, making then uniform accross platforms.
- - 2021-11-20; added extra fields in the example`VRSC.json` to accommodate a *ReSync* option.
+ - 2021-11-20; added extra fields in the example `VRSC.json` to accommodate a *ReSync* option.
  - 2021-11-20; Added the option to do a weekly Resync from genesis on a specific day (0=Sunday... 6=Saturday, or "daily" for every day). This option will override the Reindex option for that day.
  - 2021-10-29; Make external checks optional for every coin.
  - 2021-10-29; Added explorer link to the json files, to allow checking chain validity against an external source, before proceeding.

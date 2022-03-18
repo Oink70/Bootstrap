@@ -1,22 +1,22 @@
 {
-  "coin": "VRSC",
-  "coin_name": "Verus",
+  "coin": "Quantum",
+  "coin_name": "TestNet Quantum",
   "daemon_user": "verus",
   "daemon": "/home/verus/bin/verusd",
   "rpc_client": "/home/verus/bin/verus",
   "custom_chain_folder": false,
-  "chain_folder": "/home/verus/.komodo/VRSC",
+  "chain_folder": "/home/verus/.verustest/pbaas/3e76382e8354715b3f0be56608c112174baaf554",
   "template_folder": "/root/bin/bootstrap/bootstrap.template",
   "staging_folder": "/tmp/bootstrap",
-  "web_root": "/var/www/html",
-  "signee": "Verus Coin Foundation Bootstrap@",
+  "web_root": "/var/www/bootstrap",
+  "signee": "Bootstrap Releases@",
   "reindex": false,
   "sign": true,
-  "archive": false,
-  "fork_check": true,
+  "archive": true,
+  "fork_check": false,
+  "explorer_url": "",
   "resync": true,
-  "explorer_url": "https://explorer.verus.io",
-  "resync_day": "daily",
+  "resync_day": 0,
   "links":[
     {
       "tag": "Website",
@@ -33,10 +33,6 @@
     {
       "tag": "Discord",
       "URL": "https://verus.io/discord"
-    },
-    {
-      "tag": "Explorer",
-      "URL": "https://explorer.verus.io"
     }
   ]
 

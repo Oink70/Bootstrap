@@ -1,21 +1,21 @@
 {
-  "coin": "VRSC",
-  "coin_name": "Verus",
+  "coin": "PBaaS",
+  "coin_name": "TestNet PBaaS",
   "daemon_user": "verus",
   "daemon": "/home/verus/bin/verusd",
   "rpc_client": "/home/verus/bin/verus",
   "custom_chain_folder": false,
-  "chain_folder": "/home/verus/.komodo/VRSC",
+  "chain_folder": "/home/verus/.verustest/pbaas/ba692e75645ea8995c74a96475354714ca686631",
   "template_folder": "/root/bin/bootstrap/bootstrap.template",
   "staging_folder": "/tmp/bootstrap",
-  "web_root": "/var/www/html",
-  "signee": "Verus Coin Foundation Bootstrap@",
+  "web_root": "/var/www/bootstrap",
+  "signee": "Bootstrap Releases@",
   "reindex": false,
   "sign": true,
-  "archive": false,
-  "fork_check": true,
+  "archive": true,
+  "fork_check": false,
+  "explorer_url": "",
   "resync": true,
-  "explorer_url": "https://explorer.verus.io",
   "resync_day": "daily",
   "links":[
     {
@@ -33,10 +33,6 @@
     {
       "tag": "Discord",
       "URL": "https://verus.io/discord"
-    },
-    {
-      "tag": "Explorer",
-      "URL": "https://explorer.verus.io"
     }
   ]
 
