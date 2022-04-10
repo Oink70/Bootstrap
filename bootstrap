@@ -83,6 +83,7 @@ REINDEX=$(${JQ} .reindex "${SCRIPT_DIR}/${FILE}.json")
 SIGN=$(${JQ} .sign "${SCRIPT_DIR}/${FILE}.json")
 ARCHIVE=$(${JQ} .archive "${SCRIPT_DIR}/${FILE}.json")
 FORK_CHECK=$(${JQ} .fork_check "${SCRIPT_DIR}/${FILE}.json")
+DEPLOY_EXTERNALLY=$(${JQ} .deploy_externally "${SCRIPT_DIR}/${FILE}.json")
 if [ "$FORK_CHECK" == "true" ]; then
   EXPLORER=$(${JQ} -r .explorer_url "${SCRIPT_DIR}/${FILE}.json")
 fi
@@ -388,10 +389,35 @@ done
 ## Sanitizing of staging folder before deployment (is this needed?)
 rm "${STAGING_FOLDER}/${WEB_NAME}.json"
 
+## Copy to external staging locations
+# to be filled, tested and finalized
+if [[ "${DEPLOY_EXTERNALLY}" == "true" ]]; then
+  m=$(${JQ} -r ".deploy_locations | length" "${SCRIPT_DIR}/${FILE}.json")
+  for (( n=m-1; n>=0; n-- ))
+  do
+    REMOTE_HOST=$(${JQ} -r ".deploy_locations[$n].host" "${SCRIPT_DIR}/${FILE}.json")
+    REMOTE_WEB_ROOT=$(${JQ} -r ".deploy_locations[$n].web_root" "${SCRIPT_DIR}/${FILE}.json")
+    ssh -q -t $REMOTE_HOST "rm -rf $REMOTE_WEB_ROOT/last.$WEB_NAME-bootstrap && mkdir $REMOTE_WEB_ROOT/stage.$WEB_NAME-bootstrap"
+    scp -r $STAGING_FOLDER/$WEB_NAME-bootstrap/* $REMOTE_HOST:$REMOTE_WEB_ROOT/stage.$WEB_NAME-bootstrap
+  done
+fi
+
 ## Moving folders for deployment
 rm -rf "${WEB_ROOT}/last.${WEB_NAME}-bootstrap"
 mv "${WEB_ROOT}/${WEB_NAME}-bootstrap" "${WEB_ROOT}/last.${WEB_NAME}-bootstrap"
 mv "${STAGING_FOLDER}" "${WEB_ROOT}/${WEB_NAME}-bootstrap"
+
+## Deploying externally staged locations
+# to be filled, tested and finalized
+if [[ "${DEPLOY_EXTERNALLY}" == "true" ]]; then
+  m=$(${JQ} -r ".deploy_locations | length" "${SCRIPT_DIR}/${FILE}.json")
+  for (( n=m-1; n>=0; n-- ))
+  do
+    REMOTE_HOST=$(${JQ} -r ".deploy_locations[$n].host" "${SCRIPT_DIR}/${FILE}.json")
+    REMOTE_WEB_ROOT=$(${JQ} -r ".deploy_locations[$n].web_root" "${SCRIPT_DIR}/${FILE}.json")
+    ssh -q -t $REMOTE_HOST "rm $REMOTE_WEB_ROOT/stage.$WEB_NAME-bootstrap/index.html && mv $REMOTE_WEB_ROOT/$WEB_NAME-bootstrap $REMOTE_WEB_ROOT/last.$WEB_NAME-bootstrap && mv $REMOTE_WEB_ROOT/stage.$WEB_NAME-bootstrap $REMOTE_WEB_ROOT/$WEB_NAME-bootstrap && cd $REMOTE_WEB_ROOT/$WEBNAME-bootstrap && ln -s $WEBNAME.html index.html && chown -R www-data:www-data $REMOTE_WEB_ROOT/$WEBNAME-bootstrap"
+  done
+fi
 
 ## Create symlink
 cd "${WEB_ROOT}/${WEB_NAME}-bootstrap"
