@@ -397,7 +397,7 @@ if [[ "${DEPLOY_EXTERNALLY}" == "true" ]]; then
   do
     REMOTE_HOST=$(${JQ} -r ".deploy_locations[$n].host" "${SCRIPT_DIR}/${FILE}.json")
     REMOTE_WEB_ROOT=$(${JQ} -r ".deploy_locations[$n].web_root" "${SCRIPT_DIR}/${FILE}.json")
-    ssh -q -t $REMOTE_HOST "rm -rf $REMOTE_WEB_ROOT/last.$WEB_NAME-bootstrap && mkdir $REMOTE_WEB_ROOT/stage.$WEB_NAME-bootstrap"
+    ssh -q -t $REMOTE_HOST "rm -rf $REMOTE_WEB_ROOT/last.$WEB_NAME-bootstrap; mkdir $REMOTE_WEB_ROOT/stage.$WEB_NAME-bootstrap"
     scp -r $STAGING_FOLDER/$WEB_NAME-bootstrap/* $REMOTE_HOST:$REMOTE_WEB_ROOT/stage.$WEB_NAME-bootstrap
   done
 fi
@@ -415,7 +415,7 @@ if [[ "${DEPLOY_EXTERNALLY}" == "true" ]]; then
   do
     REMOTE_HOST=$(${JQ} -r ".deploy_locations[$n].host" "${SCRIPT_DIR}/${FILE}.json")
     REMOTE_WEB_ROOT=$(${JQ} -r ".deploy_locations[$n].web_root" "${SCRIPT_DIR}/${FILE}.json")
-    ssh -q -t $REMOTE_HOST "rm $REMOTE_WEB_ROOT/stage.$WEB_NAME-bootstrap/index.html && mv $REMOTE_WEB_ROOT/$WEB_NAME-bootstrap $REMOTE_WEB_ROOT/last.$WEB_NAME-bootstrap && mv $REMOTE_WEB_ROOT/stage.$WEB_NAME-bootstrap $REMOTE_WEB_ROOT/$WEB_NAME-bootstrap && cd $REMOTE_WEB_ROOT/$WEBNAME-bootstrap && ln -s $WEBNAME.html index.html && chown -R www-data:www-data $REMOTE_WEB_ROOT/$WEBNAME-bootstrap"
+    ssh -q -t $REMOTE_HOST "mv $REMOTE_WEB_ROOT/$WEB_NAME-bootstrap $REMOTE_WEB_ROOT/last.$WEB_NAME-bootstrap && mv $REMOTE_WEB_ROOT/stage.$WEB_NAME-bootstrap $REMOTE_WEB_ROOT/$WEB_NAME-bootstrap && cd $REMOTE_WEB_ROOT/$WEBNAME-bootstrap && ln -s $WEBNAME.html index.html && chown -R www-data:www-data $REMOTE_WEB_ROOT/$WEBNAME-bootstrap"
   done
 fi
 
