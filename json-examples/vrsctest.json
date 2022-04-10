@@ -1,11 +1,11 @@
 {
-  "coin": "Quantum",
-  "coin_name": "TestNet Quantum",
+  "coin": "vrsctest",
+  "coin_name": "Verus TestNet",
   "daemon_user": "verus",
   "daemon": "/home/verus/bin/verusd",
   "rpc_client": "/home/verus/bin/verus",
   "custom_chain_folder": false,
-  "chain_folder": "/home/verus/.verustest/pbaas/3e76382e8354715b3f0be56608c112174baaf554",
+  "chain_folder": "/home/verus/.komodo/vrsctest",
   "template_folder": "/root/bin/bootstrap/bootstrap.template",
   "staging_folder": "/tmp/bootstrap",
   "web_root": "/var/www/bootstrap",
@@ -13,8 +13,8 @@
   "reindex": false,
   "sign": true,
   "archive": true,
-  "fork_check": false,
-  "explorer_url": "",
+  "fork_check": true,
+  "explorer_url": "https://testex.verus.io",
   "resync": true,
   "resync_day": 0,
   "links":[
@@ -33,7 +33,17 @@
     {
       "tag": "Discord",
       "URL": "https://verus.io/discord"
+    },
+    {
+      "tag": "Explorer",
+      "URL": "https://testex.verus.io"
     }
+  ],
+  "deploy_externally": false,
+  "deploy_locations":[
+    {
+	"external_location": "bootstrap",
+	"external_web_root": "/var/www"
+	}
   ]
-
 }

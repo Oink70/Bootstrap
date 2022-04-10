@@ -1,11 +1,11 @@
 {
-  "coin": "vrsctest",
-  "coin_name": "Verus TestNet",
+  "coin": "PBaaS",
+  "coin_name": "TestNet PBaaS",
   "daemon_user": "verus",
   "daemon": "/home/verus/bin/verusd",
   "rpc_client": "/home/verus/bin/verus",
   "custom_chain_folder": false,
-  "chain_folder": "/home/verus/.komodo/vrsctest",
+  "chain_folder": "/home/verus/.verustest/pbaas/ba692e75645ea8995c74a96475354714ca686631",
   "template_folder": "/root/bin/bootstrap/bootstrap.template",
   "staging_folder": "/tmp/bootstrap",
   "web_root": "/var/www/bootstrap",
@@ -13,10 +13,10 @@
   "reindex": false,
   "sign": true,
   "archive": true,
-  "fork_check": true,
-  "explorer_url": "https://testex.verus.io",
+  "fork_check": false,
+  "explorer_url": "",
   "resync": true,
-  "resync_day": 0,
+  "resync_day": "daily",
   "links":[
     {
       "tag": "Website",
@@ -33,11 +33,13 @@
     {
       "tag": "Discord",
       "URL": "https://verus.io/discord"
-    },
-    {
-      "tag": "Explorer",
-      "URL": "https://testex.verus.io"
     }
+  ],
+  "deploy_externally": false,
+  "deploy_locations":[
+    {
+	"external_location": "bootstrap",
+	"external_web_root": "/var/www"
+	}
   ]
-
 }

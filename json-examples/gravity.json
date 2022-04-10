@@ -1,11 +1,11 @@
 {
-  "coin": "PBaaS",
-  "coin_name": "TestNet PBaaS",
+  "coin": "Gravity",
+  "coin_name": "TestNet Gravity",
   "daemon_user": "verus",
   "daemon": "/home/verus/bin/verusd",
   "rpc_client": "/home/verus/bin/verus",
   "custom_chain_folder": false,
-  "chain_folder": "/home/verus/.verustest/pbaas/ba692e75645ea8995c74a96475354714ca686631",
+  "chain_folder": "/home/verus/.verustest/pbaas/fbab277a4513315b51bbdff98c110f70d2b98081",
   "template_folder": "/root/bin/bootstrap/bootstrap.template",
   "staging_folder": "/tmp/bootstrap",
   "web_root": "/var/www/bootstrap",
@@ -14,9 +14,9 @@
   "sign": true,
   "archive": true,
   "fork_check": false,
-  "explorer_url": "",
+  "explorer_url": "https://testex.verus.io",
   "resync": true,
-  "resync_day": "daily",
+  "resync_day": 0,
   "links":[
     {
       "tag": "Website",
@@ -34,6 +34,12 @@
       "tag": "Discord",
       "URL": "https://verus.io/discord"
     }
+  ],
+  "deploy_externally": false,
+  "deploy_locations":[
+    {
+	"external_location": "bootstrap",
+	"external_web_root": "/var/www"
+	}
   ]
-
 }
