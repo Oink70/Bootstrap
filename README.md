@@ -20,6 +20,7 @@ It creates a basic page, based on the customizable `bootstrap.html.template` wit
 After staging the page, it will move the current bootstrap web folder to `last.<COINTICKER>-bootstrap`, and the staging folder will be renamed to `<COINTICKER>-bootstrap` in the web root location supplied in the json for the coin.
 
 ## Prerequisites:
+For stand-alone operations:
  - Access to the `root` account.
  - A running, fully synchronized `verusd` daemon, started with at least the `-datadir=<PATH>` option (required to differentiate between multiple daemons).
  - A configured `<COINTICKER>.json` file in the scripts folder. All paths used must be absolute paths.
@@ -29,8 +30,10 @@ After staging the page, it will move the current bootstrap web folder to `last.<
  - `CURL` installed.
  - `BC` installed.
  - `TR` installed.
-
  - A running webserver to host the webpage and bootstrap files.
+For dployment on multiple webservers:
+ - Passwordless ssh access to the remote webserver
+ - An account that has read/write access to the webroot of the remote server
 
 ## Configuration
 The `<CoinTicker>.json` must be present in the same folder as the `bootstrap` script. Configure your own `<CoinTicker>.json` and fill with the required information. The entered values are case sensitive and paths are absolute paths.
@@ -42,7 +45,7 @@ Values in the json:
   "daemon_user": "verus",                                         // (Mandatory) The linux user that is running the coin daemon
   "daemon": "/home/verus/bin/verusd",                             // (Mandatory) The complete path to (and including) the coindeamon, DO NOT ADD ANY PARAMETERS
   "rpc_client": "/home/verus/bin/verus",                          // (Mandatory) The complete path to (and including) the RPC client, DO NOT ADD ANY PARAMETERS
-  "custom_chain_folder": true|false,                              // (Boolean)   
+  "custom_chain_folder": true|false,                              // (Mandatory, Boolean)   
   "chain_folder": "/home/verus/.komodo/VRSC",                     // (Mandatory) The complate path to the chain data
   "template_folder": "/root/bin/bootstrap/bootstrap.template",    // (Mandatory) The complete path to the template for the website
   "staging_folder": "/tmp/bootstrap",                             // (Mandatory) The complete path to the temporary staging folder
@@ -79,8 +82,14 @@ Values in the json:
       "tag": "Explorer",
       "URL": "https://explorer.verus.io"
     }
+  ],
+  "deploy_externally": false,                                     // (Mandatory, boolean) Deploy to external server(s)
+  "deploy_locations":[                                            // (Mandatory when "deploy_externally" is true) "external_location" and "external_web_root" pairs for each external location to deploy to.
+    {
+      "host": "bootstrap",
+      "web_root": "/var/www"
+    }
   ]
-
 }
 
 ```
@@ -103,6 +112,9 @@ If no command line argument is entered, the script will exit.
 
 
 ## Changes:
+ - 2022-04-10; moved json example definitions to `json-examples` directory, to enable updating through `git pull`.
+ - 2022-04-10; Added code to deploy to external webservers.
+ - 2022-04-10; Expanded json definitions to enable flexible external deployment.
  - 2022-03-18; Added the folder name (hex for PBaaS, clear text for `VRSC` or `vrsctest`) to the website
  - 2022-03-18; Renamed coin PNG files to the identityhex formatted names.
  - 2022-03-18; Automatic/Manual chain selection.
