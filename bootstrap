@@ -416,7 +416,8 @@ if [[ "${DEPLOY_EXTERNALLY}" == "true" ]]; then
     REMOTE_HOST=$(${JQ} -r ".deploy_locations[$n].host" "${SCRIPT_DIR}/${FILE}.json")
     REMOTE_WEB_ROOT=$(${JQ} -r ".deploy_locations[$n].web_root" "${SCRIPT_DIR}/${FILE}.json")
     ssh -q -t $REMOTE_HOST "mv $REMOTE_WEB_ROOT/$WEB_NAME-bootstrap $REMOTE_WEB_ROOT/last.$WEB_NAME-bootstrap; mv $REMOTE_WEB_ROOT/stage.$WEB_NAME-bootstrap 
-    $REMOTE_WEB_ROOT/$WEB_NAME-bootstrap && cd $REMOTE_WEB_ROOT/$WEB_NAME-bootstrap && ln -s $WEBNAME.html index.html && chown -R www-data:www-data $REMOTE_WEB_ROOT/$WEB_NAME-bootstrap"
+    $REMOTE_WEB_ROOT/$WEB_NAME-bootstrap && cd $REMOTE_WEB_ROOT/$WEB_NAME-bootstrap && ln -s $WEB_NAME.html index.html && chown -R www-data:www-data 
+    $REMOTE_WEB_ROOT/$WEB_NAME-bootstrap"
   done
 fi
 
