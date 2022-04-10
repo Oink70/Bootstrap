@@ -42,8 +42,8 @@
   "deploy_externally": false,
   "deploy_locations":[
     {
-	"external_location": "bootstrap",
-	"external_web_root": "/var/www"
+	"host": "bootstrap",
+	"web_root": "/var/www"
 	}
   ]
 }
