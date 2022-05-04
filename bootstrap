@@ -1,5 +1,7 @@
 #!/bin/bash -x
 ##
+## © Oink 2021-2022, released under MIT license
+##
 ## This script creates bootstrap archives from the locally running chain in
 ## tar.gz and zip format.
 ## After the acrves are made, the MD5, SHA256 and SHA512 checksums are
@@ -17,11 +19,12 @@
 ## to `<cointicker>-bootstrap` in the web root location supplied in the
 ## json for the coin.
 ##
-## options in the json:
+## Basic options in the json:
 ## - "sign": true|false (sign with VerusID)
 ## - "archive": true|false (tar the webfolder for external deployment)
 ## - "reindex": true|false (reindex the chain after creating bootstrap)
 ## - "links": list of tags and links to display on the webpage
+##Check for a complete description of all options.
 ##
 ## Usage: `./bootstrap <Cointicker>`
 ## the `<CoinTicker>.json` must be present in the same folder as the
@@ -140,6 +143,17 @@ else
 fi
 ## end of sanity checks
 
+## Check if the daemon is running. If not exit, otherwise continue
+dstat=0
+count=$(su "${DAEMON_USER}" -c "${RPC_CLIENT} -chain=${COIN} -datadir=${CHAIN_FOLDER} getconnectioncount")
+case $count in
+    ''|*[!0-9]*) dstat=0 ;;
+    *) dstat=1 ;;
+esac
+if [[ "$dstat" == "0" ]]; then
+        exit 1
+fi
+
 ## Determine standard blockchain locations
 if [ "$CUSTOM_CHAIN_FOLDER" == "true" ]; then
   CHAIN_FOLDER=$(${JQ} -r .chain_folder "${SCRIPT_DIR}/${FILE}.json")
@@ -157,17 +171,6 @@ fi
 
 cp -r "${TEMPLATE_FOLDER}" "${STAGING_FOLDER}"
 
-
-## Check if the daemon is running. If not exit, otherwise continue
-dstat=0
-count=$(su "${DAEMON_USER}" -c "${RPC_CLIENT} -chain=${COIN} -datadir=${CHAIN_FOLDER} getconnectioncount")
-case $count in
-    ''|*[!0-9]*) dstat=0 ;;
-    *) dstat=1 ;;
-esac
-if [[ "$dstat" == "0" ]]; then
-        exit 1
-fi
 
 ## Check if the chain is completely synchronized and wait for full synchronization if needed.
 ## Currently only supported for the main VRSC chain, if any other chain is specified
@@ -427,10 +430,10 @@ cd /
 ## Set priviliges
 chown -R www-data:www-data "${WEB_ROOT}/${WEB_NAME}-bootstrap"
 
-## create an archive for the entire website, for easy distribution
+## create an archive for the entire website, for manual distribution
 if "${ARCHIVE}"
 then
-  ## remove web archive from the last.$WEB_NAME-bnootstrap to conserve drivespace
+  ## remove web archive from the last.$WEB_NAME-bootstrap to conserve drivespace
   if [ ! -f "${WEB_ROOT}/last.${WEB_NAME}-bootstrap/${WEB_NAME}-bootstrap.tar" ]
   then
     rm -f "${WEB_ROOT}/last.${WEB_NAME}-bootstrap/${WEB_NAME}-bootstrap.tar"
