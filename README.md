@@ -32,12 +32,13 @@ For stand-alone operations:
  - `TR` installed.
  - A running webserver to host the webpage and bootstrap files.
 For dployment on multiple webservers:
- - Passwordless ssh access to the remote webserver
+ - Passwordless ssh access to the remote webserver (SSH-key and configured in `~/.ssh/config`)
  - An account that has read/write access to the webroot of the remote server
 
 ## Configuration
-The `<CoinTicker>.json` must be present in the same folder as the `bootstrap` script. Configure your own `<CoinTicker>.json` and fill with the required information. The entered values are case sensitive and paths are absolute paths.
-Values in the json:
+The `<CoinTicker>.json` must be present in the same folder as the `bootstrap` script. You need to  either copy and adapt the examples in the `json-examples` directory or create your own 
+`<CoinTicker>.json` and fill with the required information. The entered values are case sensitive and paths are absolute paths.
+Values in the `CoinTicker>.json`:
 ```json
 {
   "coin": "VRSC",                                                 // (Mandatory) The genarlly accepted cointicker
