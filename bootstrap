@@ -291,12 +291,12 @@ then
     esac
   done
 
-  bash -c "${RPC_CLIENT} -chain=${COIN} -datadir=${CHAIN_FOLDER} signfile ${SIGNEE} ${STAGING_FOLDER}/${WEB_NAME}-bootstrap.tar.gz" > "${STAGING_FOLDER}/${WEB_NAME}-bootstrap.tar.gz.tmp"
+  su "${DAEMON_USER}" -c "${RPC_CLIENT} -chain=${COIN} -datadir=${CHAIN_FOLDER} signfile ${SIGNEE} ${STAGING_FOLDER}/${WEB_NAME}-bootstrap.tar.gz" > "${STAGING_FOLDER}/${WEB_NAME}-bootstrap.tar.gz.tmp"
   if [[ -f "${STAGING_FOLDER}/${WEB_NAME}-bootstrap.tar.gz.tmp" ]]
   then
       { head -n 1 "${STAGING_FOLDER}/${WEB_NAME}-bootstrap.tar.gz.tmp"; echo "  \"signee\": ${SIGNEE},"; tail -n +2 "${STAGING_FOLDER}/${WEB_NAME}-bootstrap.tar.gz.tmp"; } > "${STAGING_FOLDER}/${WEB_NAME}-bootstrap.tar.gz.verusid"
   fi
-  bash -c "${RPC_CLIENT} -chain=${COIN} -datadir=${CHAIN_FOLDER} signfile ${SIGNEE} ${STAGING_FOLDER}/${WEB_NAME}-bootstrap.zip"> "${STAGING_FOLDER}/${WEB_NAME}-bootstrap.zip.tmp"
+  su "${DAEMON_USER}" -c "${RPC_CLIENT} -chain=${COIN} -datadir=${CHAIN_FOLDER} signfile ${SIGNEE} ${STAGING_FOLDER}/${WEB_NAME}-bootstrap.zip"> "${STAGING_FOLDER}/${WEB_NAME}-bootstrap.zip.tmp"
   if [[ -f "${STAGING_FOLDER}/${WEB_NAME}-bootstrap.zip.tmp" ]]
   then
     { head -n 1 "${STAGING_FOLDER}/${WEB_NAME}-bootstrap.zip.tmp"; echo "  \"signee\": ${SIGNEE},"; tail -n +2 "${STAGING_FOLDER}/${WEB_NAME}-bootstrap.zip.tmp"; } > "${STAGING_FOLDER}/${WEB_NAME}-bootstrap.zip.verusid"
