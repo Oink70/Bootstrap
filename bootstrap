@@ -145,7 +145,7 @@ fi
 
 ## Check if the daemon is running. If not exit, otherwise continue
 dstat=0
-count=$(su "${DAEMON_USER}" -c "${RPC_CLIENT} -chain=${COIN} -datadir=${CHAIN_FOLDER} getconnectioncount")
+count=$(su "${DAEMON_USER}" -c "${RPC_CLIENT} -chain=${COIN} getconnectioncount")
 case $count in
     ''|*[!0-9]*) dstat=0 ;;
     *) dstat=1 ;;
@@ -160,7 +160,7 @@ if [ "$CUSTOM_CHAIN_FOLDER" == "true" ]; then
 else
   if [ "$COIN" == "VRSC" ] || [ "$COIN" == "vrsctest" ]; then
     CHAIN_FOLDER=/home/${DAEMON_USER}/.komodo/${COIN}
-	WEB_NAME=${COIN}
+    WEB_NAME=${COIN}
   else
     SYSTEMTYPE='{\"systemtype\":\"pbaas\"}'
     COIN_HEX=$(su ${DAEMON_USER} -c "${RPC_CLIENT} -chain=${COIN} listcurrencies ${SYSTEMTYPE} | jq -r --arg COIN "${COIN}" '.[] | select (.currencydefinition.name == \"$COIN\") | .currencydefinition.currencyidhex'")
@@ -247,11 +247,11 @@ echo '}' | tee -a "${STAGING_FOLDER}/${WEB_NAME}.json"
 CHAIN_DEFINITIONS=$(su ${DAEMON_USER} -c "${RPC_CLIENT} -chain=${COIN} listcurrencies '{\"systemtype\":\"pbaas\"}'")
 
 ## Determining notarization heights
-PARENT_ID=$(echo $CHAIN_DEFINITIONS | jq -r --arg TEST "${TEST}" '.[] | select (.currencydefinition.name == $TEST) | .currencydefinition.parent')
+PARENT_ID=$(echo $CHAIN_DEFINITIONS | jq -r --arg COIN "${COIN}" '.[] | select (.currencydefinition.name == $COIN) | .currencydefinition.parent')
+
 if [[ "$PARENT_ID" == "null" ]]
 then
-  ## PLACEHOLDER
-  sed -i '/<li>Signatures/d' "${STAGING_FOLDER}/${WEB_NAME}.html"
+  sleep 0.1s
 else
   PARENT_NAME=$(echo $CHAIN_DEFINITIONS | jq -r --arg PARENT_ID "${PARENT_ID}" '.[] | select (.currencydefinition.currencyid == $PARENT_ID) | .currencydefinition.name')
   CHAIN_NOTARIZATION_HEIGHT=$(su "${DAEMON_USER}" -c "${RPC_CLIENT} -chain=${PARENT_NAME} getnotarizationdata \"${COIN}\" | jq '.notarizations | .[-1].notarization.proofroots | .[-1].height'")
@@ -263,7 +263,7 @@ fi
 su "${DAEMON_USER}" -c "${RPC_CLIENT} -chain=${COIN} -datadir=${CHAIN_FOLDER} stop"
 
 ## Monitoring if the daemon is still running, before continuing
-while ps -u "${DAEMON_USER}" x | grep "${DAEMON}" | grep "${CHAIN_FOLDER}\ "; do
+while ps -u "${DAEMON_USER}" x | grep "${DAEMON}" | grep "${CHAIN_FOLDER}"; do
     sleep 2s
 done
 
@@ -386,7 +386,7 @@ fi
 if [[ "$PARENT_ID" == "null" ]]
 then
   ## Remove notarization lines from template if chain has no parent.
-  sed -i '/<li>Signatures/d' "${STAGING_FOLDER}/${WEB_NAME}.html"
+  sed -i '/notarized/d' "${STAGING_FOLDER}/${WEB_NAME}.html"
 else
   ## replace placeholders with the parent name & notarization heights
   sed -i "s~%%PARENT_NAME%%~${PARENT_NAME}~gip" "${STAGING_FOLDER}/${WEB_NAME}.html"
