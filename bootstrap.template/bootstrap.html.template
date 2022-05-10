@@ -36,6 +36,8 @@
           <li>Block height at snapshot: <b><a href="%%EXPLORER_URL%%/block/%%BOOTSTRAP_BESTBLOCKHASH%%" target="_blank">%%BOOTSTRAP_HEIGHT%%</a></b></li>
           <li>Block hash: <b><a href="%%EXPLORER_URL%%/block/%%BOOTSTRAP_BESTBLOCKHASH%%" target="_blank">%%BOOTSTRAP_BESTBLOCKHASH%%</a></b></li>
           <li>Currency folder name: <b>%%WEB_NAME%%</b></li>
+		  <li>%%COIN%% notarized into %%PARENT_NAME%% at %%PARENT_NAME%%-height: <b>%%CHAIN_NOTARIZATION_HEIGHT%%</b></li>
+		  <li>%%PARENT_NAME%% notarized into %%COIN%% at %%COIN%%-height: <b>PARENT_NOTARIZATION_HEIGHT</b></li>
           <li>Notes: <i>Unless you can guarantee no incoming transactions occur to your wallet's addresses while it is down to install the bootstrap, it is mandatory that you 'rescan' 
               the blockchain data. See <a href="https://verus.io/downloads/how-to/how-to_bootstrap.html">the bootstrap howto</a></i></li>
         </ul>

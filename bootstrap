@@ -242,6 +242,23 @@ echo "  \"bootstrap_bestblockhash\": \"${BOOTSTRAP_BLOCKHASH}\"," | tee -a "${ST
 echo "    \"bootstrap_types\": \"tar.gz zip\"" | tee -a "${STAGING_FOLDER}/${WEB_NAME}.json"
 echo '}' | tee -a "${STAGING_FOLDER}/${WEB_NAME}.json"
 
+
+## Recording PBaaS chain definitions for determining notarization heights.
+CHAIN_DEFINITIONS=$(su ${DAEMON_USER} -c "${RPC_CLIENT} -chain=${COIN} listcurrencies '{\"systemtype\":\"pbaas\"}'")
+
+## Determining notarization heights
+PARENT_ID=$(echo $CHAIN_DEFINITIONS | jq -r --arg TEST "${TEST}" '.[] | select (.currencydefinition.name == $TEST) | .currencydefinition.parent')
+if [[ "$PARENT_ID" == "null" ]]
+then
+  ## PLACEHOLDER
+  sed -i '/<li>Signatures/d' "${STAGING_FOLDER}/${WEB_NAME}.html"
+else
+  PARENT_NAME=$(echo $CHAIN_DEFINITIONS | jq -r --arg PARENT_ID "${PARENT_ID}" '.[] | select (.currencydefinition.currencyid == $PARENT_ID) | .currencydefinition.name')
+  CHAIN_NOTARIZATION_HEIGHT=$(su "${DAEMON_USER}" -c "${RPC_CLIENT} -chain=${PARENT_NAME} getnotarizationdata \"${COIN}\" | jq '.notarizations | .[-1].notarization.proofroots | .[-1].height'")
+  PARENT_NOTARIZATION_HEIGHT=$(su "${DAEMON_USER}" -c "${RPC_CLIENT} -chain=${COIN} getnotarizationdata \"${PARENT_NAME}\" | jq '.notarizations | .[0].notarization.proofroots | .[0].height'")
+fi
+
+
 ## Stopping daemon
 su "${DAEMON_USER}" -c "${RPC_CLIENT} -chain=${COIN} -datadir=${CHAIN_FOLDER} stop"
 
@@ -356,15 +373,26 @@ BOOTSTRAP_BESTBLOCKHASH=$(${JQ} -r .bootstrap_bestblockhash "${STAGING_FOLDER}/$
 ZIP_SIZE=$(ls -lah "${STAGING_FOLDER}/${WEB_NAME}-bootstrap.zip" | awk '{ print $5}')
 TGZ_SIZE=$(ls -lah "${STAGING_FOLDER}/${WEB_NAME}-bootstrap.tar.gz" | awk '{ print $5}')
 
+
 ## Create populated $WEB_NAME.html from local template file
 mv "${STAGING_FOLDER}/bootstrap.html.template" "${STAGING_FOLDER}/${WEB_NAME}.html"
 
 ## Remove signature lines from template if signature files are not present.
 if [ ! -f "${STAGING_FOLDER}/${WEB_NAME}-bootstrap.tar.gz.verusid" ]
 then
-  sed -i '/<li>Signatures/d' "${STAGING_FOLDER}/${WEB_NAME}.html"
+  sed -i '//<li>Signatures/d' "${STAGING_FOLDER}/${WEB_NAME}.html"
 fi
 
+if [[ "$PARENT_ID" == "null" ]]
+then
+  ## Remove notarization lines from template if chain has no parent.
+  sed -i '/<li>Signatures/d' "${STAGING_FOLDER}/${WEB_NAME}.html"
+else
+  ## replace placeholders with the parent name & notarization heights
+  sed -i "s~%%PARENT_NAME%%~${PARENT_NAME}~gip" "${STAGING_FOLDER}/${WEB_NAME}.html"
+  sed -i "s~%%CHAIN_NOTARIZATION_HEIGHT%%~${CHAIN_NOTARIZATION_HEIGHT}~gip" "${STAGING_FOLDER}/${WEB_NAME}.html"
+  sed -i "s~%%PARENT_NOTARIZATION_HEIGHT%%~${PARENT_NOTARIZATION_HEIGHT}~gip" "${STAGING_FOLDER}/${WEB_NAME}.html"
+fi
 
 ## replace placeholders for values with recorded values
 sed -i "s~%%EXPLORER_URL%%~${EXPLORER}~gip" "${STAGING_FOLDER}/${WEB_NAME}.html"
