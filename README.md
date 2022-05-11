@@ -103,7 +103,6 @@ The script must be run as `root`, or as another account that can run commands as
 If no command line argument is entered, the script will exit.
 
 ## ToDo:
- - fix webname when a custom chain folder is used.
  - Use notarization data for chain validity checking.
  - Add option to verify the last x blocks if reindex and resync is inactive and supply that info on the webpage.
  - make the sleep periods conditional, based on the wait reason.

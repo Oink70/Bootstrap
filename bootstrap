@@ -144,6 +144,8 @@ fi
 ## end of sanity checks
 
 ## Check if the daemon is running. If not exit, otherwise continue
+## This is the only place where no chain location is specified, since no location is set yet.
+## Chicken and egg problem. Needs more thought.
 dstat=0
 count=$(su "${DAEMON_USER}" -c "${RPC_CLIENT} -chain=${COIN} getconnectioncount")
 case $count in
@@ -155,22 +157,22 @@ if [[ "$dstat" == "0" ]]; then
 fi
 
 ## Determine standard blockchain locations
+# First: set standard locations and web names
+if [ "$COIN" == "VRSC" ] || [ "$COIN" == "vrsctest" ]; then
+  CHAIN_FOLDER=/home/${DAEMON_USER}/.komodo/${COIN}
+  WEB_NAME=${COIN}
+else
+  SYSTEMTYPE='{\"systemtype\":\"pbaas\"}'
+  COIN_HEX=$(su ${DAEMON_USER} -c "${RPC_CLIENT} -chain=${COIN} listcurrencies ${SYSTEMTYPE} | jq -r --arg COIN "${COIN}" '.[] | select (.currencydefinition.name == \"$COIN\") | .currencydefinition.currencyidhex'")
+  CHAIN_FOLDER=/home/${DAEMON_USER}/.verustest/pbaas/${COIN_HEX}
+  WEB_NAME=${COIN_HEX}
+fi
+# second: change to custom location if required
 if [ "$CUSTOM_CHAIN_FOLDER" == "true" ]; then
   CHAIN_FOLDER=$(${JQ} -r .chain_folder "${SCRIPT_DIR}/${FILE}.json")
-else
-  if [ "$COIN" == "VRSC" ] || [ "$COIN" == "vrsctest" ]; then
-    CHAIN_FOLDER=/home/${DAEMON_USER}/.komodo/${COIN}
-    WEB_NAME=${COIN}
-  else
-    SYSTEMTYPE='{\"systemtype\":\"pbaas\"}'
-    COIN_HEX=$(su ${DAEMON_USER} -c "${RPC_CLIENT} -chain=${COIN} listcurrencies ${SYSTEMTYPE} | jq -r --arg COIN "${COIN}" '.[] | select (.currencydefinition.name == \"$COIN\") | .currencydefinition.currencyidhex'")
-    CHAIN_FOLDER=/home/${DAEMON_USER}/.verustest/pbaas/${COIN_HEX}
-    WEB_NAME=${COIN_HEX}
-  fi
 fi
 
 cp -r "${TEMPLATE_FOLDER}" "${STAGING_FOLDER}"
-
 
 ## Check if the chain is completely synchronized and wait for full synchronization if needed.
 ## Currently only supported for the main VRSC chain, if any other chain is specified

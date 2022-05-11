@@ -1,5 +1,6 @@
 # Bootstrap
 ## Changelog:
+ - 2022-05-11; fix webname when a custom chain folder is used
  - 2022-05-11; Moved changed from README.md to CHANGELOG.md
  - 2022-05-10; Added Notarization data for PBaaS chains
  - 2022-05-10; Changed the way the daemon is called to ensure compatibility with PBaaS
