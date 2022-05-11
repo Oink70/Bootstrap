@@ -241,7 +241,7 @@ BOOTSTRAP_BLOCKHASH=$(su ${DAEMON_USER} -c "${RPC_CLIENT}  -chain=${COIN} -datad
 echo "  \"bootstrap_timestamp\": \"$BOOTSTRAP_TIME\"," | tee -a "${STAGING_FOLDER}/${WEB_NAME}.json"
 echo "  \"bootstrap_height\": \"${BOOTSTRAP_BLOCKCOUNT}\"," | tee -a "${STAGING_FOLDER}/${WEB_NAME}.json"
 echo "  \"bootstrap_bestblockhash\": \"${BOOTSTRAP_BLOCKHASH}\"," | tee -a "${STAGING_FOLDER}/${WEB_NAME}.json"
-echo "    \"bootstrap_types\": \"tar.gz zip\"" | tee -a "${STAGING_FOLDER}/${WEB_NAME}.json"
+echo "  \"bootstrap_types\": \"tar.gz zip\"" | tee -a "${STAGING_FOLDER}/${WEB_NAME}.json"
 echo '}' | tee -a "${STAGING_FOLDER}/${WEB_NAME}.json"
 
 
@@ -418,9 +418,6 @@ do
   { head -n 30 "${STAGING_FOLDER}/${WEB_NAME}.tmp"; echo -e "\t\t\t\t\t<li>$tag: <a href=\"$url\" target=\"_blank\">$url</a></li>"; tail -n +31 "${STAGING_FOLDER}/${WEB_NAME}.tmp"; } > "${STAGING_FOLDER}/${WEB_NAME}.html"
   rm -f "${STAGING_FOLDER}/${WEB_NAME}.tmp"
 done
-
-## Sanitizing of staging folder before deployment (is this needed?)
-rm "${STAGING_FOLDER}/${WEB_NAME}.json"
 
 ## Copy to external staging locations
 # to be filled, tested and finalized
