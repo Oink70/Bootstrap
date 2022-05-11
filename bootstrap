@@ -172,6 +172,15 @@ if [ "$CUSTOM_CHAIN_FOLDER" == "true" ]; then
   CHAIN_FOLDER=$(${JQ} -r .chain_folder "${SCRIPT_DIR}/${FILE}.json")
 fi
 
+## Read the last resync/reindex settings from web folder json
+if [[ -f "${WEB_ROOT}/${WEB_NAME-bootstrap}/${WEB_NAME}.json" ]]; then
+  CURRENT_RESYNC=$(${JQ} .bootstrap_next.resync ${WEB_ROOT}/${WEB_NAME-bootstrap}/${WEB_NAME}.json)
+  CURRENT_REINDEX=$(${JQ} .bootstrap_next.reindex ${WEB_ROOT}/${WEB_NAME-bootstrap}/${WEB_NAME}.json)
+elif
+  CURRENT_RESYNC="null"
+  CURRENT_REINDEX="null"
+fi  
+
 cp -r "${TEMPLATE_FOLDER}" "${STAGING_FOLDER}"
 
 ## Check if the chain is completely synchronized and wait for full synchronization if needed.
@@ -241,7 +250,15 @@ BOOTSTRAP_BLOCKHASH=$(su ${DAEMON_USER} -c "${RPC_CLIENT}  -chain=${COIN} -datad
 echo "  \"bootstrap_timestamp\": \"$BOOTSTRAP_TIME\"," | tee -a "${STAGING_FOLDER}/${WEB_NAME}.json"
 echo "  \"bootstrap_height\": \"${BOOTSTRAP_BLOCKCOUNT}\"," | tee -a "${STAGING_FOLDER}/${WEB_NAME}.json"
 echo "  \"bootstrap_bestblockhash\": \"${BOOTSTRAP_BLOCKHASH}\"," | tee -a "${STAGING_FOLDER}/${WEB_NAME}.json"
-echo "  \"bootstrap_types\": \"tar.gz zip\"" | tee -a "${STAGING_FOLDER}/${WEB_NAME}.json"
+echo "  \"bootstrap_types\": \"tar.gz zip\"," | tee -a "${STAGING_FOLDER}/${WEB_NAME}.json"
+echo "  \"bootstrap_current\": [" | tee -a "${STAGING_FOLDER}/${WEB_NAME}.json"
+echo "    \"resync\": \"${CURRENT_RESYNC}\"," | tee -a "${STAGING_FOLDER}/${WEB_NAME}.json"
+echo "    \"reindex\": \"${CURRENT_REINDEX\"" | tee -a "${STAGING_FOLDER}/${WEB_NAME}.json"
+echo "  ]," | tee -a "${STAGING_FOLDER}/${WEB_NAME}.json"
+echo "  \"bootstrap_next\": [" | tee -a "${STAGING_FOLDER}/${WEB_NAME}.json"
+echo "    \"resync\": \"${RESYNC}\"," | tee -a "${STAGING_FOLDER}/${WEB_NAME}.json"
+echo "    \"reindex\": \"${REINDEX}\"" | tee -a "${STAGING_FOLDER}/${WEB_NAME}.json"
+echo "  ]" | tee -a "${STAGING_FOLDER}/${WEB_NAME}.json"
 echo '}' | tee -a "${STAGING_FOLDER}/${WEB_NAME}.json"
 
 
@@ -407,6 +424,18 @@ sed -i "s/%%COIN%%/${COIN}/gip" "${STAGING_FOLDER}/${WEB_NAME}.html"
 sed -i "s/%%WEB_NAME%%/${WEB_NAME}/gip" "${STAGING_FOLDER}/${WEB_NAME}.html"
 sed -i "s/%%COIN_NAME%%/${COIN_NAME}/gip" "${STAGING_FOLDER}/${WEB_NAME}.html"
 sed -i '$!N; /^\(.*\)\n\1$/!P; D' "${STAGING_FOLDER}/${WEB_NAME}.html"
+
+## Insert Synchronization method into $WEB_NAME.html
+if ! [[ "${CURRENT_RESYNC}" == "null" ]]; then
+   v "${STAGING_FOLDER}/${WEB_NAME}.html" "${STAGING_FOLDER}/${WEB_NAME}.tmp"
+  { head -n 37 "${STAGING_FOLDER}/${WEB_NAME}.tmp"; echo -e "\t\t\t\t\t<li>The chain was synchronized from genesis: <b>${CURRENT_RESYNC}</b></li>"; tail -n +38 "${STAGING_FOLDER}/${WEB_NAME}.tmp"; } > "${STAGING_FOLDER}/${WEB_NAME}.html"
+  rm -f "${STAGING_FOLDER}/${WEB_NAME}.tmp"
+fi
+if ! [[ "${CURRENT_REINDEX}" == "null" ]]; then
+   v "${STAGING_FOLDER}/${WEB_NAME}.html" "${STAGING_FOLDER}/${WEB_NAME}.tmp"
+  { head -n 37 "${STAGING_FOLDER}/${WEB_NAME}.tmp"; echo -e "\t\t\t\t\t<li>The chain was reindexed: <b>${CURRENT_RESYNC}</b></li>"; tail -n +38 "${STAGING_FOLDER}/${WEB_NAME}.tmp"; } > "${STAGING_FOLDER}/${WEB_NAME}.html"
+  rm -f "${STAGING_FOLDER}/${WEB_NAME}.tmp"
+fi
 
 ## Fill $WEB_NAME.html with links from $WEB_NAME.json
 m=$(${JQ} -r ".links | length" "${SCRIPT_DIR}/${FILE}.json")
