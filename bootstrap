@@ -426,15 +426,20 @@ sed -i "s/%%COIN_NAME%%/${COIN_NAME}/gip" "${STAGING_FOLDER}/${WEB_NAME}.html"
 sed -i '$!N; /^\(.*\)\n\1$/!P; D' "${STAGING_FOLDER}/${WEB_NAME}.html"
 
 ## Insert Synchronization method into $WEB_NAME.html
-if ! [[ "${CURRENT_RESYNC}" == "null" ]]; then
-   mv "${STAGING_FOLDER}/${WEB_NAME}.html" "${STAGING_FOLDER}/${WEB_NAME}.tmp"
-  { head -n 37 "${STAGING_FOLDER}/${WEB_NAME}.tmp"; echo -e "\t\t\t\t\t<li>The chain was synchronized from genesis: <b>${CURRENT_RESYNC}</b></li>"; tail -n +38 "${STAGING_FOLDER}/${WEB_NAME}.tmp"; } > "${STAGING_FOLDER}/${WEB_NAME}.html"
-  rm -f "${STAGING_FOLDER}/${WEB_NAME}.tmp"
-fi
-if ! [[ "${CURRENT_REINDEX}" == "null" ]]; then
-   mv "${STAGING_FOLDER}/${WEB_NAME}.html" "${STAGING_FOLDER}/${WEB_NAME}.tmp"
-  { head -n 37 "${STAGING_FOLDER}/${WEB_NAME}.tmp"; echo -e "\t\t\t\t\t<li>The chain was reindexed: <b>${CURRENT_RESYNC}</b></li>"; tail -n +38 "${STAGING_FOLDER}/${WEB_NAME}.tmp"; } > "${STAGING_FOLDER}/${WEB_NAME}.html"
-  rm -f "${STAGING_FOLDER}/${WEB_NAME}.tmp"
+if ! [[ "${CURRENT_RESYNC}" == "null" || "${CURRENT_REINDEX}" == "null" ]]; then
+  if [[ "${CURRENT_RESYNC}" == "true" ]]; then
+    mv "${STAGING_FOLDER}/${WEB_NAME}.html" "${STAGING_FOLDER}/${WEB_NAME}.tmp"
+    { head -n 37 "${STAGING_FOLDER}/${WEB_NAME}.tmp"; echo -e "\t\t\t\t\t<li>Before bootstrapping, the chain was <b>synchronized from genesis</b>.</li>"; tail -n +38 "${STAGING_FOLDER}/${WEB_NAME}.tmp"; } > "${STAGING_FOLDER}/${WEB_NAME}.html"
+    rm -f "${STAGING_FOLDER}/${WEB_NAME}.tmp"
+  elif [[ "${CURRENT_REINDEX}" == "true" ]]; then
+    mv "${STAGING_FOLDER}/${WEB_NAME}.html" "${STAGING_FOLDER}/${WEB_NAME}.tmp"
+    { head -n 37 "${STAGING_FOLDER}/${WEB_NAME}.tmp"; echo -e "\t\t\t\t\t<li>Before bootstrapping, the chain was <b>reindexed</b>.</li>"; tail -n +38 "${STAGING_FOLDER}/${WEB_NAME}.tmp"; } > "${STAGING_FOLDER}/${WEB_NAME}.html"
+    rm -f "${STAGING_FOLDER}/${WEB_NAME}.tmp"
+  else
+    mv "${STAGING_FOLDER}/${WEB_NAME}.html" "${STAGING_FOLDER}/${WEB_NAME}.tmp"
+    { head -n 37 "${STAGING_FOLDER}/${WEB_NAME}.tmp"; echo -e "\t\t\t\t\t<li>Before bootstrapping, the chain continued after the previous bootstrap.</li>"; tail -n +38 "${STAGING_FOLDER}/${WEB_NAME}.tmp"; } > "${STAGING_FOLDER}/${WEB_NAME}.html"
+    rm -f "${STAGING_FOLDER}/${WEB_NAME}.tmp"
+  fi
 fi
 
 ## Fill $WEB_NAME.html with links from $WEB_NAME.json
