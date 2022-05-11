@@ -251,14 +251,14 @@ echo "  \"bootstrap_timestamp\": \"$BOOTSTRAP_TIME\"," | tee -a "${STAGING_FOLDE
 echo "  \"bootstrap_height\": \"${BOOTSTRAP_BLOCKCOUNT}\"," | tee -a "${STAGING_FOLDER}/${WEB_NAME}.json"
 echo "  \"bootstrap_bestblockhash\": \"${BOOTSTRAP_BLOCKHASH}\"," | tee -a "${STAGING_FOLDER}/${WEB_NAME}.json"
 echo "  \"bootstrap_types\": \"tar.gz zip\"," | tee -a "${STAGING_FOLDER}/${WEB_NAME}.json"
-echo "  \"bootstrap_current\": [" | tee -a "${STAGING_FOLDER}/${WEB_NAME}.json"
+echo "  \"bootstrap_current\": {" | tee -a "${STAGING_FOLDER}/${WEB_NAME}.json"
 echo "    \"resync\": \"${CURRENT_RESYNC}\"," | tee -a "${STAGING_FOLDER}/${WEB_NAME}.json"
 echo "    \"reindex\": \"${CURRENT_REINDEX}\"" | tee -a "${STAGING_FOLDER}/${WEB_NAME}.json"
-echo "  ]," | tee -a "${STAGING_FOLDER}/${WEB_NAME}.json"
-echo "  \"bootstrap_next\": [" | tee -a "${STAGING_FOLDER}/${WEB_NAME}.json"
+echo "  }," | tee -a "${STAGING_FOLDER}/${WEB_NAME}.json"
+echo "  \"bootstrap_next\": {" | tee -a "${STAGING_FOLDER}/${WEB_NAME}.json"
 echo "    \"resync\": \"${RESYNC}\"," | tee -a "${STAGING_FOLDER}/${WEB_NAME}.json"
 echo "    \"reindex\": \"${REINDEX}\"" | tee -a "${STAGING_FOLDER}/${WEB_NAME}.json"
-echo "  ]" | tee -a "${STAGING_FOLDER}/${WEB_NAME}.json"
+echo "  }" | tee -a "${STAGING_FOLDER}/${WEB_NAME}.json"
 echo '}' | tee -a "${STAGING_FOLDER}/${WEB_NAME}.json"
 
 
