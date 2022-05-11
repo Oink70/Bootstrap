@@ -104,6 +104,7 @@ If no command line argument is entered, the script will exit.
 
 ## ToDo:
  - fix webname when a custom chain folder is used.
+ - Use notarization data for chain validity checking.
  - Add option to verify the last x blocks if reindex and resync is inactive and supply that info on the webpage.
  - make the sleep periods conditional, based on the wait reason.
  - Add info on webpage on *Genesis synchronized* or *Reindexed*.
@@ -113,49 +114,7 @@ If no command line argument is entered, the script will exit.
 
 
 ## Changes:
- - 2022-05-10; Added Notarization data for PBaaS chains
- - 2022-05-10; Changed the way the daemon is called to ensure compatibility with PBaaS
- - 2022-04-10; Moved json example definitions to `json-examples` directory, to enable updating through `git pull`.
- - 2022-04-10; Added code to deploy to external webservers.
- - 2022-04-10; Expanded json definitions to enable flexible external deployment.
- - 2022-03-18; Added the folder name (hex for PBaaS, clear text for `VRSC` or `vrsctest`) to the website
- - 2022-03-18; Renamed coin PNG files to the identityhex formatted names.
- - 2022-03-18; Automatic/Manual chain selection.
- - 2022-03-18; Automatically retrieve PBaaS identityhex and use it as folder/file names, preventing them to have special characters in them.
- - 2022-03-18; Added `"custom_chain_folder": true|false,` to coin json.
- - 2022-03-17; un-nested commands retrieving current chain status, to improve PBaaS compatibility
- - 2022-03-17; Added current testnet chain jsons
- - 2021-11-23; Prevented edge case where for checks fail if new blocks arrive while checking.
- - 2021-11-23; Made links to block and hash controlled by json data, instead of fixed to `https://explorer.verus.io`
- - 2021-11-23; clarified documentation on daemon and rpc-client.
- - 2021-11-22; Added explanation concerning the values in the `<COINTICKER>.json` in the README.md
- - 2021-11-22; Added daily genesis synchronization capabilities.
- - 2021-11-20; Added checks on the validity of the data specified in the `<COIN>.json` to ensure that files, folders and user exist.
- - 2021-11-20; Refactored the `su` commands, making then uniform accross platforms.
- - 2021-11-20; added extra fields in the example `VRSC.json` to accommodate a *ReSync* option.
- - 2021-11-20; Added the option to do a weekly Resync from genesis on a specific day (0=Sunday... 6=Saturday, or "daily" for every day). This option will override the Reindex option for that day.
- - 2021-10-29; Make external checks optional for every coin.
- - 2021-10-29; Added explorer link to the json files, to allow checking chain validity against an external source, before proceeding.
- - 2021-10-29; Added further sanity checks.
- - 2021-10-29; removed execution permissions from files that are not executable.
- - 2021-10-15; Check if chain is running at start of script. If not running, the script will exit.
- - 2021-10-15; Check hash of local bestblock against hash of same block on explorer.verus.io (checking on fork). Script will exit if not identical (VRSC main chain only)
- - 2021-10-15; Check blockheight against explorer.verus.io and wait until the local daemon is synchronized with the explorer. (VSC main chain only)
- - 2021-06-09; Auto-remove distribution archive from `last.$COIN-bootstrap` folder to conserve storage space.
- - 2021-06-08; Signatures and links to them are removed from webpage if signing fails.
- - 2021-06-08; Made optional archive for distribution through value in `<COINTICKER>.json`. Archive is placed in the bootstrap web folder for easy downloading.
- - 2021-06-08; Made signed releases optional through value in `<COINTICKER>.json`.
- - 2021-06-08; Made reindexing optional through value in `<COINTICKER>.json`.
- - 2021-06-08; Added external dependency check for `zip`.
- - 2021-06-07; Fill the website with links from the `<COINTICKER>.json`.
- - 2021-06-07; Check if the chain is completely synchronized and wait for full synchronization if needed (no fork check).
- - 2021-06-07; Fixed shutdown check on specific daemon.
- - 2021-06-05; Implemented a check on shutdown of the specific daemon.
- - 2021-06-05; Implemented dependencies check
- - 2021-06-05; Bootstrap time no longer shows the time the bootstrap process is actually started, but reflects the time the last included block was mined/staked.
- - 2021-05-24; added `-rf` to `rm last.-bootstrap`
- - 2021-05-18; Add `-datadir` to daemon calls
- - 2021-05-17; Initial commit
+Check the https://github.com/Oink70/Bootstrap/blob/main/CHANGELOG.md for changes.
 
 ## DISCLAIMER
 Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
