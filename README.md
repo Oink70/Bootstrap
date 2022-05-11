@@ -36,7 +36,7 @@ For dployment on multiple webservers:
  - An account that has read/write access to the webroot of the remote server
 
 ## Configuration
-The `<CoinTicker>.json` must be present in the same folder as the `bootstrap` script. You need to  either copy and adapt the examples in the `json-examples` directory or create your own 
+The `<CoinTicker>.json` must be present in the same folder as the `bootstrap` script. You need to  either copy and adapt the examples in the `json-examples` directory or create your own
 `<CoinTicker>.json` and fill with the required information. The entered values are case sensitive and paths are absolute paths.
 Values in the `CoinTicker>.json`:
 ```json
@@ -103,7 +103,7 @@ The script must be run as `root`, or as another account that can run commands as
 If no command line argument is entered, the script will exit.
 
 ## ToDo:
- - fix
+ - fix webname when a custom chain folder is used.
  - Add option to verify the last x blocks if reindex and resync is inactive and supply that info on the webpage.
  - make the sleep periods conditional, based on the wait reason.
  - Add info on webpage on *Genesis synchronized* or *Reindexed*.
@@ -113,7 +113,9 @@ If no command line argument is entered, the script will exit.
 
 
 ## Changes:
- - 2022-04-10; moved json example definitions to `json-examples` directory, to enable updating through `git pull`.
+ - 2022-05-10; Added Notarization data for PBaaS chains
+ - 2022-05-10; Changed the way the daemon is called to ensure compatibility with PBaaS
+ - 2022-04-10; Moved json example definitions to `json-examples` directory, to enable updating through `git pull`.
  - 2022-04-10; Added code to deploy to external webservers.
  - 2022-04-10; Expanded json definitions to enable flexible external deployment.
  - 2022-03-18; Added the folder name (hex for PBaaS, clear text for `VRSC` or `vrsctest`) to the website
