@@ -176,10 +176,10 @@ fi
 if [[ -f "${WEB_ROOT}/${WEB_NAME-bootstrap}/${WEB_NAME}.json" ]]; then
   CURRENT_RESYNC=$(${JQ} .bootstrap_next.resync ${WEB_ROOT}/${WEB_NAME-bootstrap}/${WEB_NAME}.json)
   CURRENT_REINDEX=$(${JQ} .bootstrap_next.reindex ${WEB_ROOT}/${WEB_NAME-bootstrap}/${WEB_NAME}.json)
-elif
+else
   CURRENT_RESYNC="null"
   CURRENT_REINDEX="null"
-fi  
+fi
 
 cp -r "${TEMPLATE_FOLDER}" "${STAGING_FOLDER}"
 
