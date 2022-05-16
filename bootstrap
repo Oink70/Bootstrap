@@ -268,7 +268,7 @@ CHAIN_DEFINITIONS=$(su ${DAEMON_USER} -c "${RPC_CLIENT} -chain=${COIN} listcurre
 ## Determining notarization heights
 PARENT_ID=$(echo $CHAIN_DEFINITIONS | jq -r --arg COIN "${COIN}" '.[] | select (.currencydefinition.name == $COIN) | .currencydefinition.parent')
 
-if [[ "$PARENT_ID" == "null" ]]
+if [[ "$PARENT_ID" == "null" || "$PARENT_ID" == "" ]]
 then
   sleep 0.1s
 else
@@ -402,9 +402,9 @@ then
   sed -i '//<li>Signatures/d' "${STAGING_FOLDER}/${WEB_NAME}.html"
 fi
 
-if [[ "$PARENT_ID" == "null" ]]
+if [[ "$PARENT_ID" == "null" || "$PARENT_ID" == "" ]]
 then
-  ## Remove notarization lines from template if chain has no parent.
+  ## Remove notarization lines from template if chain has no parent, or PBaaS is not (yet) enabled on the chain.
   sed -i '/notarized/d' "${STAGING_FOLDER}/${WEB_NAME}.html"
 else
   ## replace placeholders with the parent name & notarization heights
