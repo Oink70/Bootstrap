@@ -103,7 +103,6 @@ The script must be run as `root`, or as another account that can run commands as
 If no command line argument is entered, the script will exit.
 
 ## ToDo:
- - Check integrity of archives and fix or cleanup+exit before signing.
  - Add complete notarization data for PBaaS chains.
  - make the sleep periods conditional, based on the wait reason.
  - Make new templates in line with the Verus website style.
