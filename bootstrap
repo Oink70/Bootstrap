@@ -286,10 +286,21 @@ while ps -u "${DAEMON_USER}" x | grep "${DAEMON}" | grep "${CHAIN_FOLDER}"; do
     sleep 2s
 done
 
-## Creating bootstrap archives
+## Creating bootstrap tar.gz archive
 cd "${CHAIN_FOLDER}"
+## checking integrity of the created archive. Delete and exit if integrity is compromised (leave daemon switched off)
 tar -czvf "${WEB_NAME}-bootstrap.tar.gz" blocks chainstate
+if ! tar tf "${WEB_NAME}-bootstrap.tar.gz" &> /dev/null; then
+    rm "${WEB_NAME}-bootstrap.tar.gz"
+    exit 1
+fi
+## Creating bootstrap zip archive
 ${ZIP} -r "${WEB_NAME}-bootstrap.zip"  blocks chainstate
+## checking integrity of the created archive. Delete and exit if integrity is compromised (leave daemon switched off)
+if ! unzip -t "${WEB_NAME}-bootstrap.zip" &> /dev/null; then
+    rm "${WEB_NAME}-bootstrap.zip"
+    exit 1
+fi
 
 
 ## Starting daemon back up if signing is required or reindex or rescan is false
