@@ -1,5 +1,6 @@
 # Bootstrap
 ## Changelog:
+ - 2022-05-30; Updated ToDo list in README.md. 
  - 2022-05-16; Included extra check to avoid non-info on the webpages when PBaaS is not activated (yet) on the chain.
  - 2022-05-12; Record and display sync/reindex data on website.
  - 2022-05-11; Included `${WEB_NAME}.json` on to the website folder to easy check for latest bootstrap data.

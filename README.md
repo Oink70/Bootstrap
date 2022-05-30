@@ -103,10 +103,9 @@ The script must be run as `root`, or as another account that can run commands as
 If no command line argument is entered, the script will exit.
 
 ## ToDo:
- - Use notarization data for chain validity checking.
- - Add option to verify the last x blocks if reindex and resync is inactive and supply that info on the webpage.
+ - Check integrity of archives and fix or cleanup+exit before signing.
+ - Add complete notarization data for PBaaS chains.
  - make the sleep periods conditional, based on the wait reason.
- - Add info on webpage on *Genesis synchronized* or *Reindexed*.
  - Make new templates in line with the Verus website style.
  - Make zip and tarball optional, defaulting to tarball.
  - Whatever else springs to mind.
