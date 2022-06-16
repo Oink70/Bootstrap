@@ -1,5 +1,6 @@
 # Bootstrap
 ## Changelog:
+ - 2022-06-16; Fixed failure to remove Signature lines from web page when not available.
  - 2022-05-30; Added checks for archive integrity before checksums/signature is created.
  - 2022-05-30; Updated ToDo list in README.md. 
  - 2022-05-16; Included extra check to avoid non-info on the webpages when PBaaS is not activated (yet) on the chain.

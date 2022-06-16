@@ -410,7 +410,7 @@ mv "${STAGING_FOLDER}/bootstrap.html.template" "${STAGING_FOLDER}/${WEB_NAME}.ht
 ## Remove signature lines from template if signature files are not present.
 if [ ! -f "${STAGING_FOLDER}/${WEB_NAME}-bootstrap.tar.gz.verusid" ]
 then
-  sed -i '//<li>Signatures/d' "${STAGING_FOLDER}/${WEB_NAME}.html"
+  sed -i '/<li>Signatures/d' "${STAGING_FOLDER}/${WEB_NAME}.html"
 fi
 
 if [[ "$PARENT_ID" == "null" || "$PARENT_ID" == "" ]]
