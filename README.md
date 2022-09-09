@@ -2,7 +2,7 @@
 Script to automate the bootstrap creation for Verus, Verus Testnet and (near future) PBaaS chains. Likely usable for most BTC or Zcash descendant chains.
 
 This script is currently in use to produce the Verus bootstrap and is tested on Devuan BeoWulf, Debian Bullseye and Ubuntu Focal Fossa.
-Tested chains: VRSC, vrsctest, Dynamo, Quantum, Gravity/
+Tested chains: VRSC, vrsctest, Dynamo, Quantum, Gravity.
 Tested daemon: Up till verus release v0.9.4-1
 
 ## Description:
