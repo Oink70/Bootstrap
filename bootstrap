@@ -163,7 +163,8 @@ if [ "$COIN" == "VRSC" ] || [ "$COIN" == "vrsctest" ]; then
   WEB_NAME=${COIN}
 else
   SYSTEMTYPE='{\"systemtype\":\"pbaas\"}'
-  COIN_HEX=$(su ${DAEMON_USER} -c "${RPC_CLIENT} -chain=${COIN} listcurrencies ${SYSTEMTYPE} | jq -r --arg COIN "${COIN}" '.[] | select (.currencydefinition.name == \"$COIN\") | .currencydefinition.currencyidhex'")
+  COIN_HEX=$(su ${DAEMON_USER} -c "${RPC_CLIENT} -chain=${COIN} listcurrencies ${SYSTEMTYPE} | #{JQ} -r --arg COIN "${COIN}" '.[] | select (.currencydefinition.name == \"$COIN\") | 
+  .currencydefinition.currencyidhex'")
   CHAIN_FOLDER=/home/${DAEMON_USER}/.verustest/pbaas/${COIN_HEX}
   WEB_NAME=${COIN_HEX}
 fi
@@ -220,7 +221,7 @@ if [ "$FORK_CHECK" == "true" ]; then
   while [[ ! "$CHECK_STATUS" == "OK" ]]; do
     # collect data
     HASH_LOCAL=$(su "${DAEMON_USER}" -c "${RPC_CLIENT} -chain=${COIN} -datadir=${CHAIN_FOLDER} getbestblockhash")
-	HEIGHT_LOCAL=$(su "${DAEMON_USER}" -c "${RPC_CLIENT} -chain=${COIN} -datadir=${CHAIN_FOLDER} getblock ${HASH_LOCAL} 1 | jq -r .height")
+	HEIGHT_LOCAL=$(su "${DAEMON_USER}" -c "${RPC_CLIENT} -chain=${COIN} -datadir=${CHAIN_FOLDER} getblock ${HASH_LOCAL} 1 | ${JQ} -r .height")
 	HASH_REMOTE=$(${CURL} --silent "${EXPLORER}/api/getblockhash?index=${HEIGHT_LOCAL}" | ${JQ} -r .)
 
     # determine status
@@ -245,7 +246,7 @@ fi
 echo "{" | tee $STAGING_FOLDER/$WEB_NAME.json
 echo "  \"coin\": \"${COIN}\"," | tee -a "${STAGING_FOLDER}/${WEB_NAME}.json"
 BOOTSTRAP_BLOCKCOUNT=$(su ${DAEMON_USER} -c "${RPC_CLIENT} -chain=${COIN} getblockcount")
-BOOTSTRAP_TIME=$(su ${DAEMON_USER} -c "${RPC_CLIENT} -chain=${COIN} getblock ${BOOTSTRAP_BLOCKCOUNT} 1 | jq -r .time")
+BOOTSTRAP_TIME=$(su ${DAEMON_USER} -c "${RPC_CLIENT} -chain=${COIN} getblock ${BOOTSTRAP_BLOCKCOUNT} 1 | ${JQ} -r .time")
 BOOTSTRAP_BLOCKHASH=$(su ${DAEMON_USER} -c "${RPC_CLIENT}  -chain=${COIN} -datadir=${CHAIN_FOLDER} getblockhash ${BOOTSTRAP_BLOCKCOUNT}")
 echo "  \"bootstrap_timestamp\": \"$BOOTSTRAP_TIME\"," | tee -a "${STAGING_FOLDER}/${WEB_NAME}.json"
 echo "  \"bootstrap_height\": \"${BOOTSTRAP_BLOCKCOUNT}\"," | tee -a "${STAGING_FOLDER}/${WEB_NAME}.json"
@@ -266,17 +267,16 @@ echo '}' | tee -a "${STAGING_FOLDER}/${WEB_NAME}.json"
 CHAIN_DEFINITIONS=$(su ${DAEMON_USER} -c "${RPC_CLIENT} -chain=${COIN} listcurrencies '{\"systemtype\":\"pbaas\"}'")
 
 ## Determining notarization heights
-PARENT_ID=$(echo $CHAIN_DEFINITIONS | jq -r --arg COIN "${COIN}" '.[] | select (.currencydefinition.name == $COIN) | .currencydefinition.parent')
+PARENT_ID=$(echo $CHAIN_DEFINITIONS | ${JQ} -r --arg COIN "${COIN}" '.[] | select (.currencydefinition.name == $COIN) | .currencydefinition.parent')
 
 if [[ "$PARENT_ID" == "null" || "$PARENT_ID" == "" ]]
 then
   sleep 0.1s
 else
-  PARENT_NAME=$(echo $CHAIN_DEFINITIONS | jq -r --arg PARENT_ID "${PARENT_ID}" '.[] | select (.currencydefinition.currencyid == $PARENT_ID) | .currencydefinition.name')
-  CHAIN_NOTARIZATION_HEIGHT=$(su "${DAEMON_USER}" -c "${RPC_CLIENT} -chain=${PARENT_NAME} getnotarizationdata \"${COIN}\" | jq '.notarizations | .[-1].notarization.proofroots | .[-1].height'")
-  PARENT_NOTARIZATION_HEIGHT=$(su "${DAEMON_USER}" -c "${RPC_CLIENT} -chain=${COIN} getnotarizationdata \"${PARENT_NAME}\" | jq '.notarizations | .[0].notarization.proofroots | .[0].height'")
+  PARENT_NAME=$(echo $CHAIN_DEFINITIONS | ${JQ} -r --arg PARENT_ID "${PARENT_ID}" '.[] | select (.currencydefinition.currencyid == $PARENT_ID) | .currencydefinition.name')
+  CHAIN_NOTARIZATION_HEIGHT=$(su "${DAEMON_USER}" -c "${RPC_CLIENT} -chain=${PARENT_NAME} getnotarizationdata \"${COIN}\" | ${JQ} '.notarizations | .[0].notarization.notarizationheight'")
+  PARENT_NOTARIZATION_HEIGHT=$(su "${DAEMON_USER}" -c "${RPC_CLIENT} -chain=${COIN} getnotarizationdata \"${PARENT_NAME}\" | ${JQ} '.notarizations | .[0].notarization.notarizationheight'")
 fi
-
 
 ## Stopping daemon
 su "${DAEMON_USER}" -c "${RPC_CLIENT} -chain=${COIN} -datadir=${CHAIN_FOLDER} stop"
