@@ -3,7 +3,7 @@ Script to automate the bootstrap creation for Verus, Verus Testnet and (near fut
 
 This script is currently in use to produce the Verus bootstrap and is tested on Devuan BeoWulf, Debian Bullseye and Ubuntu Focal Fossa.
 Tested chains: VRSC, vrsctest, Dynamo, Quantum, Gravity.
-Tested daemon: Up till verus release v0.9.4-1
+Tested daemon: Up till verus release v0.9.9-5
 
 ## Description:
 This script creates bootstrap archives from the locally running chain in tar.gz and zip format.
@@ -93,10 +93,14 @@ Values in the `CoinTicker>.json`:
     }
   ]
 }
-
 ```
 The bootstrap webpage will be in a generated <COIN>-bootstrap folder in the supplied webroot
 Supply a `<CoinTicker>.png` in the `img` folder for a coin logo on the page.
+
+NOTE: to run the the bootstrap on a cronjob **and** distribute to multiple servers, the server running the bootstrap script must have passwordless (and by extention 2FA-less) access to the target host(s). This is achieved by:
+1. Allowing the server access to port 22 (or any other port if you don't use the standard SSH port) on the target server. Preferably only the IP(s) accessing the hosting server(2) are granted access.
+2. The public SSH key must be in the `/root/.ssh/authorized_keys` file.
+3. Target server access must be properly configured in the `/root/.ssh/config` file.
 
 ## Usage:
 `./bootstrap <Cointicker>`
