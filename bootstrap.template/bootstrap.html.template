@@ -65,7 +65,8 @@
       </p>
       <p>
         <hr style="border-top: 1px dotted black; width: 666px; padding: 0; height: 0; margin: 0" />
-        <font size=1>&copy;2018-2022 <a href="https://verus.io/">verus.io</a>. The bootstrap archives and web pages are generated in Bash. Join us on <a href="https://verus.io/discord" target="_blank">Discord</a> to get in touch.</font>
+        <font size=1>&copy;2018-2023 <a href="https://verus.io/">verus.io</a>. The bootstrap archives and web pages are generated in Bash. Join us on <a href="https://verus.io/discord" 
+        target="_blank">Discord</a> to get in touch.</font>
       </p>
     </article>
   </body>

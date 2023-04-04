@@ -1,5 +1,7 @@
 # Bootstrap
 ## Changelog:
+ - 2023-04-04; Updated copyright texts
+ - 2023-04-03; Updated README.md with additional notes on multi-host requirements.
  - 2022-06-16; Fixed failure to remove Signature lines from web page when not available.
  - 2022-05-30; Added checks for archive integrity before checksums/signature is created.
  - 2022-05-30; Updated ToDo list in README.md. 

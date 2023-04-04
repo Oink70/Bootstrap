@@ -1,6 +1,8 @@
 #!/bin/bash -x
 ##
-## © Oink 2021-2022, released under MIT license
+## © verus.io 2018-2023, released under MIT license
+## Script written in 2021 by Oink.vrsc@
+## Script maintained by Oink.vrsc@
 ##
 ## This script creates bootstrap archives from the locally running chain in
 ## tar.gz and zip format.
