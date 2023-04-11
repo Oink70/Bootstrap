@@ -1,6 +1,10 @@
 # Bootstrap
 ## Changelog:
+ - 2023-04-11; Added code to process `distribution_type` resulting in bootstraps in tar, zip or both (defaults to `tar` if the setting is not present)
+ - 2023-04-11; reworked script workflow to accomodate `distribution_type`.
+ - 2023-04-11; Added `"distribution_type": "zip|tar|both"` to coin json
  - 2023-04-11; bootstrap script will exit if current wallet does not have signing authority.
+ - 2023-04-11; Some minor rights settings on the files.
  - 2022-05-11; Included `${WEB_NAME}.json` on to the website folder to easy check for latest bootstrap data.
  - 2022-05-11; fix webname when a custom chain folder is used
  - 2022-05-11; Moved changed from README.md to CHANGELOG.md

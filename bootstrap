@@ -84,6 +84,7 @@ WEB_ROOT=$(${JQ} -r .web_root "${SCRIPT_DIR}/${FILE}.json")
 SIGNEE=$(${JQ} .signee "${SCRIPT_DIR}/${FILE}.json")
 REINDEX=$(${JQ} .reindex "${SCRIPT_DIR}/${FILE}.json")
 SIGN=$(${JQ} .sign "${SCRIPT_DIR}/${FILE}.json")
+DISTRIBUTION_TYPE=$(${JQ} -r .distribution_type "${SCRIPT_DIR}/${FILE}.json")
 ARCHIVE=$(${JQ} .archive "${SCRIPT_DIR}/${FILE}.json")
 FORK_CHECK=$(${JQ} .fork_check "${SCRIPT_DIR}/${FILE}.json")
 DEPLOY_EXTERNALLY=$(${JQ} .deploy_externally "${SCRIPT_DIR}/${FILE}.json")
@@ -98,6 +99,12 @@ if [ "$RESYNC"  == "true" ]; then
   else
     RESYNC="false"
   fi
+fi
+if [[ "$DISTRIBUTION_TYPE" == "tar" || "$DISTRIBUTION_TYPE" == "zip" || "$DISTRIBUTION_TYPE" == "both" ]]
+then
+  echo "Distribution type $DISTRIBUTION_TYPE accepted."
+else
+  DISTRIBUTION_TYPE="tar"
 fi
 
 ## Sanity checks
@@ -181,8 +188,6 @@ else
   CURRENT_REINDEX="null"
 fi
 
-cp -r "${TEMPLATE_FOLDER}" "${STAGING_FOLDER}"
-
 ## Check if the chain is completely synchronized and wait for full synchronization if needed.
 ## Currently only supported for the main VRSC chain, if any other chain is specified
 ## These tests will be bypassed. Checking requires public block explorers available.
@@ -246,12 +251,13 @@ then
   if [[ ! "$CAN_SIGN" == "true" ]]
   then
     echo "The specified ID cannot sign from this wallet"
-  exit 1
+    exit 1
   fi
 fi
 
 ## Record Bootstrap snapshot data
 
+cp -r "${TEMPLATE_FOLDER}" "${STAGING_FOLDER}"
 echo "{" | tee $STAGING_FOLDER/$WEB_NAME.json
 echo "  \"coin\": \"${COIN}\"," | tee -a "${STAGING_FOLDER}/${WEB_NAME}.json"
 BOOTSTRAP_BLOCKCOUNT=$(su ${DAEMON_USER} -c "${RPC_CLIENT} -chain=${COIN} getblockcount")
@@ -260,7 +266,16 @@ BOOTSTRAP_BLOCKHASH=$(su ${DAEMON_USER} -c "${RPC_CLIENT}  -chain=${COIN} -datad
 echo "  \"bootstrap_timestamp\": \"$BOOTSTRAP_TIME\"," | tee -a "${STAGING_FOLDER}/${WEB_NAME}.json"
 echo "  \"bootstrap_height\": \"${BOOTSTRAP_BLOCKCOUNT}\"," | tee -a "${STAGING_FOLDER}/${WEB_NAME}.json"
 echo "  \"bootstrap_bestblockhash\": \"${BOOTSTRAP_BLOCKHASH}\"," | tee -a "${STAGING_FOLDER}/${WEB_NAME}.json"
-echo "  \"bootstrap_types\": \"tar.gz zip\"," | tee -a "${STAGING_FOLDER}/${WEB_NAME}.json"
+if [[ "${DISTRIBUTION_TYPE}" == "tar" ]]
+then 
+  echo "  \"bootstrap_types\": [\"tar.gz\"]," | tee -a "${STAGING_FOLDER}/${WEB_NAME}.json"
+elif [[ "${DISTRIBUTION_TYPE}" == "zip" ]]
+then
+  echo "  \"bootstrap_types\": [\"zip\"]," | tee -a "${STAGING_FOLDER}/${WEB_NAME}.json"
+elif [[ "${DISTRIBUTION_TYPE}" == "both" ]]
+then
+  echo "  \"bootstrap_types\": [\"tar.gz\",\"zip\"]," | tee -a "${STAGING_FOLDER}/${WEB_NAME}.json"
+fi
 echo "  \"bootstrap_current\": {" | tee -a "${STAGING_FOLDER}/${WEB_NAME}.json"
 echo "    \"resync\": \"${CURRENT_RESYNC}\"," | tee -a "${STAGING_FOLDER}/${WEB_NAME}.json"
 echo "    \"reindex\": \"${CURRENT_REINDEX}\"" | tee -a "${STAGING_FOLDER}/${WEB_NAME}.json"
@@ -296,22 +311,32 @@ while ps -u "${DAEMON_USER}" x | grep "${DAEMON}" | grep "${CHAIN_FOLDER}"; do
     sleep 2s
 done
 
-## Creating bootstrap tar.gz archive
+## Creating bootstrap tar.gz archive, check integrity, move to staging folder and determine the size
 cd "${CHAIN_FOLDER}"
-## checking integrity of the created archive. Delete and exit if integrity is compromised (leave daemon switched off)
-tar -czvf "${WEB_NAME}-bootstrap.tar.gz" blocks chainstate
-if ! tar tf "${WEB_NAME}-bootstrap.tar.gz" &> /dev/null; then
+if [[ "${DISTRIBUTION_TYPE}" == "tar" || "${DISTRIBUTION_TYPE}" == "both" ]]
+then
+  tar -czvf "${WEB_NAME}-bootstrap.tar.gz" blocks chainstate
+  ## checking integrity of the created archive. Delete and exit if integrity is compromised (leave daemon switched off)
+  if ! tar tf "${WEB_NAME}-bootstrap.tar.gz" &> /dev/null; then
     rm "${WEB_NAME}-bootstrap.tar.gz"
     exit 1
-fi
-## Creating bootstrap zip archive
-${ZIP} -r "${WEB_NAME}-bootstrap.zip"  blocks chainstate
-## checking integrity of the created archive. Delete and exit if integrity is compromised (leave daemon switched off)
-if ! unzip -t "${WEB_NAME}-bootstrap.zip" &> /dev/null; then
-    rm "${WEB_NAME}-bootstrap.zip"
-    exit 1
+  fi
+  mv "${CHAIN_FOLDER}/${WEB_NAME}-bootstrap.tar.gz" "${STAGING_FOLDER}"
+  TGZ_SIZE=$(ls -lah "${STAGING_FOLDER}/${WEB_NAME}-bootstrap.tar.gz" | awk '{ print $5}')
 fi
 
+## Creating bootstrap zip archive, check integrity, move to staging folder and determine the size
+if [[ "${DISTRIBUTION_TYPE}" == "zip" || "${DISTRIBUTION_TYPE}" == "both" ]]
+then
+  ${ZIP} -r "${WEB_NAME}-bootstrap.zip"  blocks chainstate
+  ## checking integrity of the created archive. Delete and exit if integrity is compromised (leave daemon switched off)
+  if ! unzip -t "${WEB_NAME}-bootstrap.zip" &> /dev/null; then
+    rm "${WEB_NAME}-bootstrap.zip"
+    exit 1
+  fi
+  mv "${CHAIN_FOLDER}/${WEB_NAME}-bootstrap.zip" "${STAGING_FOLDER}"
+  ZIP_SIZE=$(ls -lah "${STAGING_FOLDER}/${WEB_NAME}-bootstrap.zip" | awk '{ print $5}')
+fi
 
 ## Starting daemon back up if signing is required or reindex or rescan is false
 if [[ ( "${SIGN}" == "true" ) || (( "${REINDEX}" == "false" ) && ( "${RESYNC}" == "false" )) ]]
@@ -319,18 +344,22 @@ then
   su "${DAEMON_USER}" -c "cd ${CHAIN_FOLDER} && ${DAEMON} -chain=${COIN} -datadir=${CHAIN_FOLDER} -daemon 1>/dev/null 2>&1"
 fi
 
-## Moving bootstrap archives to bootstrap folder
-mv "${CHAIN_FOLDER}/${WEB_NAME}-bootstrap.tar.gz" "${CHAIN_FOLDER}/${WEB_NAME}-bootstrap.zip" "${STAGING_FOLDER}"
 
 ## Creating checksum files
 cd "${STAGING_FOLDER}"
-md5sum -b "${WEB_NAME}-bootstrap.tar.gz" >"${WEB_NAME}-bootstrap.tar.gz.md5sum"
-sha256sum -b "${WEB_NAME}-bootstrap.tar.gz" >"${WEB_NAME}-bootstrap.tar.gz.sha256sum"
-sha512sum -b "${WEB_NAME}-bootstrap.tar.gz" >"${WEB_NAME}-bootstrap.tar.gz.sha512sum"
+if [[ "${DISTRIBUTION_TYPE}" == "tar" || "${DISTRIBUTION_TYPE}" == "both" ]]
+then
+  md5sum -b "${WEB_NAME}-bootstrap.tar.gz" >"${WEB_NAME}-bootstrap.tar.gz.md5sum"
+  sha256sum -b "${WEB_NAME}-bootstrap.tar.gz" >"${WEB_NAME}-bootstrap.tar.gz.sha256sum"
+  sha512sum -b "${WEB_NAME}-bootstrap.tar.gz" >"${WEB_NAME}-bootstrap.tar.gz.sha512sum"
+fi
 
-md5sum -b "${WEB_NAME}-bootstrap.zip" >"${WEB_NAME}-bootstrap.zip.md5sum"
-sha256sum -b "${WEB_NAME}-bootstrap.zip" >"${WEB_NAME}-bootstrap.zip.sha256sum"
-sha512sum -b "${WEB_NAME}-bootstrap.zip" >"${WEB_NAME}-bootstrap.zip.sha512sum"
+if [[ "${DISTRIBUTION_TYPE}" == "zip" || "${DISTRIBUTION_TYPE}" == "both" ]]
+then
+  md5sum -b "${WEB_NAME}-bootstrap.zip" >"${WEB_NAME}-bootstrap.zip.md5sum"
+  sha256sum -b "${WEB_NAME}-bootstrap.zip" >"${WEB_NAME}-bootstrap.zip.sha256sum"
+  sha512sum -b "${WEB_NAME}-bootstrap.zip" >"${WEB_NAME}-bootstrap.zip.sha512sum"
+fi
 
 ## check if signature creating is enabled and create VerusID signatures
 if "${SIGN}"
@@ -348,17 +377,26 @@ then
     esac
   done
 
-  su "${DAEMON_USER}" -c "${RPC_CLIENT} -chain=${COIN} -datadir=${CHAIN_FOLDER} signfile ${SIGNEE} ${STAGING_FOLDER}/${WEB_NAME}-bootstrap.tar.gz" > "${STAGING_FOLDER}/${WEB_NAME}-bootstrap.tar.gz.tmp"
-  if [[ -f "${STAGING_FOLDER}/${WEB_NAME}-bootstrap.tar.gz.tmp" ]]
+  ## sign the tar.gz release
+  if [[ "${DISTRIBUTION_TYPE}" == "tar" || "${DISTRIBUTION_TYPE}" == "both" ]]
   then
+    su "${DAEMON_USER}" -c "${RPC_CLIENT} -chain=${COIN} -datadir=${CHAIN_FOLDER} signfile ${SIGNEE} ${STAGING_FOLDER}/${WEB_NAME}-bootstrap.tar.gz" > "${STAGING_FOLDER}/${WEB_NAME}-bootstrap.tar.gz.tmp"
+    if [[ -f "${STAGING_FOLDER}/${WEB_NAME}-bootstrap.tar.gz.tmp" ]]
+    then
       { head -n 1 "${STAGING_FOLDER}/${WEB_NAME}-bootstrap.tar.gz.tmp"; echo "  \"signee\": ${SIGNEE},"; tail -n +2 "${STAGING_FOLDER}/${WEB_NAME}-bootstrap.tar.gz.tmp"; } > "${STAGING_FOLDER}/${WEB_NAME}-bootstrap.tar.gz.verusid"
+    fi
+  rm "${STAGING_FOLDER}/${WEB_NAME}-bootstrap.tar.gz.tmp"
   fi
-  su "${DAEMON_USER}" -c "${RPC_CLIENT} -chain=${COIN} -datadir=${CHAIN_FOLDER} signfile ${SIGNEE} ${STAGING_FOLDER}/${WEB_NAME}-bootstrap.zip"> "${STAGING_FOLDER}/${WEB_NAME}-bootstrap.zip.tmp"
-  if [[ -f "${STAGING_FOLDER}/${WEB_NAME}-bootstrap.zip.tmp" ]]
+  ## sig the zip release
+  if [[ "${DISTRIBUTION_TYPE}" == "zip" || "${DISTRIBUTION_TYPE}" == "both" ]]
   then
-    { head -n 1 "${STAGING_FOLDER}/${WEB_NAME}-bootstrap.zip.tmp"; echo "  \"signee\": ${SIGNEE},"; tail -n +2 "${STAGING_FOLDER}/${WEB_NAME}-bootstrap.zip.tmp"; } > "${STAGING_FOLDER}/${WEB_NAME}-bootstrap.zip.verusid"
+    su "${DAEMON_USER}" -c "${RPC_CLIENT} -chain=${COIN} -datadir=${CHAIN_FOLDER} signfile ${SIGNEE} ${STAGING_FOLDER}/${WEB_NAME}-bootstrap.zip"> "${STAGING_FOLDER}/${WEB_NAME}-bootstrap.zip.tmp"
+    if [[ -f "${STAGING_FOLDER}/${WEB_NAME}-bootstrap.zip.tmp" ]]
+    then
+      { head -n 1 "${STAGING_FOLDER}/${WEB_NAME}-bootstrap.zip.tmp"; echo "  \"signee\": ${SIGNEE},"; tail -n +2 "${STAGING_FOLDER}/${WEB_NAME}-bootstrap.zip.tmp"; } > "${STAGING_FOLDER}/${WEB_NAME}-bootstrap.zip.verusid"
+    fi
+  rm "${STAGING_FOLDER}/${WEB_NAME}-bootstrap.zip.tmp"
   fi
-  rm "${STAGING_FOLDER}/${WEB_NAME}-bootstrap.tar.gz.tmp" "${STAGING_FOLDER}/${WEB_NAME}-bootstrap.zip.tmp"
 fi
 
 ## depending on the value of $REINDEX, stop the chain and start it with the `-reindex` parameters
@@ -410,17 +448,28 @@ COIN=$(${JQ} -r .coin "${STAGING_FOLDER}/${WEB_NAME}.json")
 BOOTSTRAP_TIMESTAMP=$(date -d @$(${JQ} -r .bootstrap_timestamp "${STAGING_FOLDER}/${WEB_NAME}.json"))
 BOOTSTRAP_HEIGHT=$(${JQ} -r .bootstrap_height "${STAGING_FOLDER}/${WEB_NAME}.json")
 BOOTSTRAP_BESTBLOCKHASH=$(${JQ} -r .bootstrap_bestblockhash "${STAGING_FOLDER}/${WEB_NAME}.json")
-ZIP_SIZE=$(ls -lah "${STAGING_FOLDER}/${WEB_NAME}-bootstrap.zip" | awk '{ print $5}')
-TGZ_SIZE=$(ls -lah "${STAGING_FOLDER}/${WEB_NAME}-bootstrap.tar.gz" | awk '{ print $5}')
-
 
 ## Create populated $WEB_NAME.html from local template file
 mv "${STAGING_FOLDER}/bootstrap.html.template" "${STAGING_FOLDER}/${WEB_NAME}.html"
-
-## Remove signature lines from template if signature files are not present.
-if [ ! -f "${STAGING_FOLDER}/${WEB_NAME}-bootstrap.tar.gz.verusid" ]
+## Remove unused distribution options
+if [[ "${DISTRIBUTION_TYPE}" == "tar" ]]
 then
-  sed -i '//<li>Signatures/d' "${STAGING_FOLDER}/${WEB_NAME}.html"
+  mv "${STAGING_FOLDER}/${WEB_NAME}.html" "${STAGING_FOLDER}/${WEB_NAME}.tmp"
+  { head -n 54 "${STAGING_FOLDER}/${WEB_NAME}.tmp"; tail -n +65 "${STAGING_FOLDER}/${WEB_NAME}.tmp"; } > "${STAGING_FOLDER}/${WEB_NAME}.html"
+  rm -f "${STAGING_FOLDER}/${WEB_NAME}.tmp"
+fi
+if [[ "${DISTRIBUTION_TYPE}" == "zip" ]]
+then
+  mv "${STAGING_FOLDER}/${WEB_NAME}.html" "${STAGING_FOLDER}/${WEB_NAME}.tmp"
+  { head -n 46 "${STAGING_FOLDER}/${WEB_NAME}.tmp"; tail -n +54 "${STAGING_FOLDER}/${WEB_NAME}.tmp"; } > "${STAGING_FOLDER}/${WEB_NAME}.html"
+  rm -f "${STAGING_FOLDER}/${WEB_NAME}.tmp"
+fi
+
+
+## Remove signature lines from template if signing is false.
+if ! ${SIGN}
+then
+  sed -i '/<li>Signatures:/d' "${STAGING_FOLDER}/${WEB_NAME}.html"
 fi
 
 if [[ "$PARENT_ID" == "null" ]]
@@ -439,8 +488,14 @@ sed -i "s~%%EXPLORER_URL%%~${EXPLORER}~gip" "${STAGING_FOLDER}/${WEB_NAME}.html"
 sed -i "s/%%BOOTSTRAP_TIMESTAMP%%/${BOOTSTRAP_TIMESTAMP}/gip" "${STAGING_FOLDER}/${WEB_NAME}.html"
 sed -i "s/%%BOOTSTRAP_BESTBLOCKHASH%%/${BOOTSTRAP_BESTBLOCKHASH}/gip" "${STAGING_FOLDER}/${WEB_NAME}.html"
 sed -i "s/%%BOOTSTRAP_HEIGHT%%/${BOOTSTRAP_HEIGHT}/gip" "${STAGING_FOLDER}/${WEB_NAME}.html"
-sed -i "s/%%ZIP_SIZE%%/${ZIP_SIZE}/gip" "${STAGING_FOLDER}/${WEB_NAME}.html"
-sed -i "s/%%TGZ_SIZE%%/${TGZ_SIZE}/gip" "${STAGING_FOLDER}/${WEB_NAME}.html"
+if [[ "${DISTRIBUTION_TYPE}" == "zip" || "${DISTRIBUTION_TYPE}" == "both" ]]
+then
+  sed -i "s/%%ZIP_SIZE%%/${ZIP_SIZE}/gip" "${STAGING_FOLDER}/${WEB_NAME}.html"
+fi
+if [[ "${DISTRIBUTION_TYPE}" == "tar" || "${DISTRIBUTION_TYPE}" == "both" ]]
+then
+  sed -i "s/%%TGZ_SIZE%%/${TGZ_SIZE}/gip" "${STAGING_FOLDER}/${WEB_NAME}.html"
+fi
 sed -i "s/%%COIN%%/${COIN}/gip" "${STAGING_FOLDER}/${WEB_NAME}.html"
 sed -i "s/%%WEB_NAME%%/${WEB_NAME}/gip" "${STAGING_FOLDER}/${WEB_NAME}.html"
 sed -i "s/%%COIN_NAME%%/${COIN_NAME}/gip" "${STAGING_FOLDER}/${WEB_NAME}.html"
@@ -475,7 +530,6 @@ do
 done
 
 ## Copy to external staging locations
-# to be filled, tested and finalized
 if [[ "${DEPLOY_EXTERNALLY}" == "true" ]]; then
   m=$(${JQ} -r ".deploy_locations | length" "${SCRIPT_DIR}/${FILE}.json")
   for (( n=m-1; n>=0; n-- ))
@@ -493,7 +547,6 @@ mv "${WEB_ROOT}/${WEB_NAME}-bootstrap" "${WEB_ROOT}/last.${WEB_NAME}-bootstrap"
 mv "${STAGING_FOLDER}" "${WEB_ROOT}/${WEB_NAME}-bootstrap"
 
 ## Deploying externally staged locations
-# to be filled, tested and finalized
 if [[ "${DEPLOY_EXTERNALLY}" == "true" ]]; then
   m=$(${JQ} -r ".deploy_locations | length" "${SCRIPT_DIR}/${FILE}.json")
   for (( n=m-1; n>=0; n-- ))

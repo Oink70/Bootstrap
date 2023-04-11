@@ -61,6 +61,7 @@ Values in the `CoinTicker>.json`:
   "resync_day": "daily",                                          // (integer or text) Text "daily" will trigger a resync on any weekday
                                                                   //                   Number 0-6 will trigger the resync ONLY on that weekday
                                                                   //                   0=Sunday, 1=Monday, ... , 6=Saturday
+  "distribution_type": "both",                                    // (String)    "zip", "tar" or "both". defaults to "tar" if not present.
   "archive": false,                                               // (Boolean)   After finishing bootstrap, create a "COIN-bootstrap.tar" in the standard webfolder
   "links":[                                                       // Optional:   "tag" and "URL" pairs included in the bootstrap webpage
     {
@@ -106,9 +107,7 @@ If no command line argument is entered, the script will exit.
  - Use notarization data for chain validity checking.
  - Add option to verify the last x blocks if reindex and resync is inactive and supply that info on the webpage.
  - make the sleep periods conditional, based on the wait reason.
- - Add info on webpage on *Genesis synchronized* or *Reindexed*.
  - Make new templates in line with the Verus website style.
- - Make zip and tarball optional, defaulting to tarball.
  - Whatever else springs to mind.
 
 
