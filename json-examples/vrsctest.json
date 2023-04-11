@@ -12,6 +12,7 @@
   "signee": "Bootstrap Releases@",
   "reindex": false,
   "sign": true,
+  "distribution_type": "both",
   "archive": true,
   "fork_check": true,
   "explorer_url": "https://testex.verus.io",

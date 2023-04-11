@@ -12,6 +12,7 @@
   "signee": "Verus Coin Foundation Bootstrap@",
   "reindex": false,
   "sign": true,
+  "distribution_type": "both",
   "archive": false,
   "fork_check": true,
   "resync": true,
