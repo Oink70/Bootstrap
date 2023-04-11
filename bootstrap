@@ -239,6 +239,16 @@ if [ "$FORK_CHECK" == "true" ]; then
   done
 fi
 
+## Check if the wallet can sign the bootstrap if signing is enabled.
+if [[ ( "${SIGN}" == "true" )]]
+then
+  CAN_SIGN=$(su "${DAEMON_USER}" -c "${RPC_CLIENT} -chain=${COIN} -datadir=${CHAIN_FOLDER} getidentity ${SIGNEE} | ${JQ} .cansignfor")
+  if [[ ! "$CAN_SIGN" == "true" ]]
+  then
+    echo "The specified ID cannot sign from this wallet"
+  exit 1
+  fi
+fi
 
 ## Record Bootstrap snapshot data
 

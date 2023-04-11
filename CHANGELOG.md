@@ -1,5 +1,6 @@
 # Bootstrap
 ## Changelog:
+ - 2023-04-11; bootstrap script will exit if current wallet does not have signing authority.
  - 2022-05-11; Included `${WEB_NAME}.json` on to the website folder to easy check for latest bootstrap data.
  - 2022-05-11; fix webname when a custom chain folder is used
  - 2022-05-11; Moved changed from README.md to CHANGELOG.md
