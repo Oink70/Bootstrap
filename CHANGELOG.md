@@ -1,5 +1,8 @@
 # Bootstrap
 ## Changelog:
+ - 2024-06-13; Updated copyright notice.
+ - 2024-06-13; Changes compression protocol from `gzip` to `zstd` for improved compression and speed.
+ - 2024-06-13; Adjusted folder `~./verustest` to `~/.verus` to move from testnet to mainnet for PBaaS chains. (testnet chains will no longer be supported with this modification).
  - 2023-04-11; Added code to process `distribution_type` resulting in bootstraps in tar, zip or both (defaults to `tar` if the setting is not present)
  - 2023-04-11; reworked script workflow to accomodate `distribution_type`.
  - 2023-04-11; Added `"distribution_type": "zip|tar|both"` to coin json

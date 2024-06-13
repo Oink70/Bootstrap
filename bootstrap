@@ -1,6 +1,6 @@
 #!/bin/bash -x
 ##
-## © verus.io 2018-2023, released under MIT license
+## © verus.io 2018-2024, released under MIT license
 ## Script written in 2021 by Oink.vrsc@
 ## Script maintained by Oink.vrsc@
 ##
@@ -172,9 +172,8 @@ if [ "$COIN" == "VRSC" ] || [ "$COIN" == "vrsctest" ]; then
   WEB_NAME=${COIN}
 else
   SYSTEMTYPE='{\"systemtype\":\"pbaas\"}'
-  COIN_HEX=$(su ${DAEMON_USER} -c "${RPC_CLIENT} -chain=${COIN} listcurrencies ${SYSTEMTYPE} | #{JQ} -r --arg COIN "${COIN}" '.[] | select (.currencydefinition.name == \"$COIN\") | 
-  .currencydefinition.currencyidhex'")
-  CHAIN_FOLDER=/home/${DAEMON_USER}/.verustest/pbaas/${COIN_HEX}
+  COIN_HEX=$(su ${DAEMON_USER} -c "${RPC_CLIENT} -chain=${COIN} listcurrencies ${SYSTEMTYPE} | #{JQ} -r --arg COIN "${COIN}" '.[] | select (.currencydefinition.name == \"$COIN\") | .currencydefinition.currencyidhex'")
+  CHAIN_FOLDER=/home/${DAEMON_USER}/.verus/pbaas/${COIN_HEX}
   WEB_NAME=${COIN_HEX}
 fi
 # second: change to custom location if required
@@ -317,7 +316,7 @@ done
 cd "${CHAIN_FOLDER}"
 if [[ "${DISTRIBUTION_TYPE}" == "tar" || "${DISTRIBUTION_TYPE}" == "both" ]]
 then
-  tar -czvf "${WEB_NAME}-bootstrap.tar.gz" blocks chainstate
+  tar --zstd -cf "${WEB_NAME}-bootstrap.tar.gz" blocks chainstate
   ## checking integrity of the created archive. Delete and exit if integrity is compromised (leave daemon switched off)
   if ! tar tf "${WEB_NAME}-bootstrap.tar.gz" &> /dev/null; then
     rm "${WEB_NAME}-bootstrap.tar.gz"
