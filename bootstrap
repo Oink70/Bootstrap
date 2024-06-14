@@ -318,7 +318,7 @@ done
 cd "${CHAIN_FOLDER}"
 if [[ "${DISTRIBUTION_TYPE}" == "tar" || "${DISTRIBUTION_TYPE}" == "both" ]]
 then
-  tar -I 'zstd -T0 -19' -cf "${WEB_NAME}-bootstrap.tar.gz" blocks chainstate
+  tar -I 'pigz' -cf "${WEB_NAME}-bootstrap.tar.gz" blocks chainstate
   ## checking integrity of the created archive. Delete and exit if integrity is compromised (leave daemon switched off)
   if ! tar tf "${WEB_NAME}-bootstrap.tar.gz" &> /dev/null; then
     rm "${WEB_NAME}-bootstrap.tar.gz"

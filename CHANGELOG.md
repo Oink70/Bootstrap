@@ -1,9 +1,8 @@
 # Bootstrap
 ## Changelog:
- - 2024-06-12; Force zstd to use all available cores, compensating for some of the lost compression speed.
- - 2024-06-14; Tweak compression level of zstd, sacrificing compression speed, but improving compression level with about 20%.
+
  - 2024-06-13; Updated copyright notice.
- - 2024-06-13; Changes compression protocol from `gzip` to `zstd` for improved compression and speed.
+ - 2024-06-13; Changes compression binary from `gzip` to `pigz` for multithreaded compression..
  - 2024-06-13; Adjusted folder `~./verustest` to `~/.verus` to move from testnet to mainnet for PBaaS chains. (testnet chains will no longer be supported with this modification).
  - 2023-04-11; Added code to process `distribution_type` resulting in bootstraps in tar, zip or both (defaults to `tar` if the setting is not present)
  - 2023-04-11; reworked script workflow to accomodate `distribution_type`.
