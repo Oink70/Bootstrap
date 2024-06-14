@@ -217,7 +217,9 @@ if [ "$FORK_CHECK" == "true" ]; then
         CHECK_STATUS="CRIT"
       fi
     fi
-    sleep 15s
+    if [ ! "${CHECK_STATUS}" -eq "OK" ]; then
+      sleep 15s
+    fi
   done
 
   ## Check if the node is forked, exit if forking is detected
@@ -316,7 +318,7 @@ done
 cd "${CHAIN_FOLDER}"
 if [[ "${DISTRIBUTION_TYPE}" == "tar" || "${DISTRIBUTION_TYPE}" == "both" ]]
 then
-  tar --zstd -cf "${WEB_NAME}-bootstrap.tar.gz" blocks chainstate
+  tar -I 'zstd -T0 -19' -cf "${WEB_NAME}-bootstrap.tar.gz" blocks chainstate
   ## checking integrity of the created archive. Delete and exit if integrity is compromised (leave daemon switched off)
   if ! tar tf "${WEB_NAME}-bootstrap.tar.gz" &> /dev/null; then
     rm "${WEB_NAME}-bootstrap.tar.gz"

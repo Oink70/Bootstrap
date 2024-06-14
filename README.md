@@ -1,9 +1,9 @@
 # Bootstrap
 Script to automate the bootstrap creation for Verus, Verus Testnet and (near future) PBaaS chains. Likely usable for most BTC or Zcash descendant chains.
 
-This script is currently in use to produce the Verus bootstrap and is tested on Devuan BeoWulf, Debian Bullseye and Ubuntu Focal Fossa.
-Tested chains: VRSC, vrsctest, Dynamo, Quantum, Gravity.
-Tested daemon: Up till verus release v0.9.9-5
+This script is currently in use to produce the Verus bootstrap and is tested on Devuan BeoWulf, Debian Bullseye, Debian Bookworm  and Ubuntu Focal Fossa.
+Tested chains: VRSC, vARRR, vrsctest.
+Tested daemon: Up till verus release v1.2.2-5
 
 ## Description:
 This script creates bootstrap archives from the locally running chain in tar.gz and zip format.
@@ -109,8 +109,8 @@ The script must be run as `root`, or as another account that can run commands as
 If no command line argument is entered, the script will exit.
 
 ## ToDo:
+ - Add testnet compatibility.
  - Add complete notarization data for PBaaS chains.
- - make the sleep periods conditional, based on the wait reason.
  - Make new templates in line with the Verus website style.
  - Whatever else springs to mind.
 

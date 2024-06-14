@@ -1,5 +1,7 @@
 # Bootstrap
 ## Changelog:
+ - 2024-06-12; Force zstd to use all available cores, compensating for some of the lost compression speed.
+ - 2024-06-14; Tweak compression level of zstd, sacrificing compression speed, but improving compression level with about 20%.
  - 2024-06-13; Updated copyright notice.
  - 2024-06-13; Changes compression protocol from `gzip` to `zstd` for improved compression and speed.
  - 2024-06-13; Adjusted folder `~./verustest` to `~/.verus` to move from testnet to mainnet for PBaaS chains. (testnet chains will no longer be supported with this modification).
