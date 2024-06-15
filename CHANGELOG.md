@@ -1,6 +1,6 @@
 # Bootstrap
 ## Changelog:
- - 2024-06-15; Added startupswitch `-fastboot` to quickly start the daemon for signing only.
+ - 2024-06-15; Added startupswitch `-fastload` to quickly start the daemon for signing only.
  - 2024-06-13; Updated copyright notice.
  - 2024-06-13; Changes compression binary from `gzip` to `pigz` for multithreaded compression..
  - 2024-06-13; Adjusted folder `~./verustest` to `~/.verus` to move from testnet to mainnet for PBaaS chains. (testnet chains will no longer be supported with this modification).
