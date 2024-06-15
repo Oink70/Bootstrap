@@ -345,8 +345,12 @@ fi
 rm -rf "${WEB_ROOT}/last.${WEB_NAME}-bootstrap"
 
 ## Starting daemon back up if signing is required or reindex or rescan is false
-if [[ ( "${SIGN}" == "true" ) || (( "${REINDEX}" == "false" ) && ( "${RESYNC}" == "false" )) ]]
+if [[ ( "${SIGN}" == "true" ) ]]
 then
+  su "${DAEMON_USER}" -c "cd ${CHAIN_FOLDER} && ${DAEMON} -chain=${COIN} -datadir=${CHAIN_FOLDER} -fastload -daemon 1>/dev/null 2>&1"
+elif [[ (( "${REINDEX}" == "false" ) && ( "${RESYNC}" == "false" )) ]]
+then
+  ## the `-fastload` startup switch is available since release v1.2.3-1
   su "${DAEMON_USER}" -c "cd ${CHAIN_FOLDER} && ${DAEMON} -chain=${COIN} -datadir=${CHAIN_FOLDER} -daemon 1>/dev/null 2>&1"
 fi
 
