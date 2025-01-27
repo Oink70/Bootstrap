@@ -1,5 +1,6 @@
 # Bootstrap
 ## Changelog:
+ - 2025-01-27; Update copyright year on website template and in creation script.
  - 2024-06-15; Added startupswitch `-fastload` to quickly start the daemon for signing only.
  - 2024-06-13; Updated copyright notice.
  - 2024-06-13; Changes compression binary from `gzip` to `pigz` for multithreaded compression..
