@@ -1,9 +1,9 @@
 # Bootstrap
 Script to automate the bootstrap creation for Verus, Verus Testnet and (near future) PBaaS chains. Likely usable for most BTC or Zcash descendant chains.
 
-This script is currently in use to produce the Verus bootstrap and is tested on Devuan BeoWulf, Debian Bullseye, Debian Bookworm  and Ubuntu Focal Fossa.
+This script is currently in use to produce the Verus bootstrap and is tested on Devuan BeoWulf, Devuan Chimera, Devuan Daedalus, Devuan Excalibur, Debian Bullseye, Debian Bookworm, Debian Trixie and Ubuntu Focal Fossa.
 Tested chains: VRSC, vARRR, vrsctest.
-Tested daemon: Up till verus release v1.2.2-5
+Tested daemon: Up till verus release v1.2.16-1
 
 ## Description:
 This script creates bootstrap archives from the locally running chain in tar.gz and zip format.
