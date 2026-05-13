@@ -16,6 +16,7 @@
   "archive": true,
   "fork_check": true,
   "explorer_url": "https://testex.verus.io",
+  "api_url": "https://api.verustest.net",
   "resync": true,
   "resync_day": 0,
   "links":[
