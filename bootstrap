@@ -1,6 +1,6 @@
 #!/bin/bash -x
 ##
-## © verus.io 2018-2025, released under MIT license
+## © verus.io 2018-2026, released under MIT license
 ## Script written in 2021 by Oink.vrsc@
 ## Script maintained by Oink.vrsc@
 ##
@@ -65,6 +65,10 @@ if ! command -v tr &>/dev/null ; then
     echo "tr not found. please install using your package manager."
     exit 1
 fi
+if ! command -v pigz&>/dev/null ; then
+    echo "pigz not found. please install using your package manager."
+    exit 1
+fi
 ZIP=$(which zip)
 JQ=$(which jq)
 CURL=$(which curl)
@@ -92,6 +96,7 @@ FORK_CHECK=$(${JQ} .fork_check "${SCRIPT_DIR}/${FILE}.json")
 DEPLOY_EXTERNALLY=$(${JQ} .deploy_externally "${SCRIPT_DIR}/${FILE}.json")
 if [ "$FORK_CHECK" == "true" ]; then
   EXPLORER=$(${JQ} -r .explorer_url "${SCRIPT_DIR}/${FILE}.json")
+  API=$(${JQ} -r .api_url "${SCRIPT_DIR}/${FILE}.json")
 fi
 RESYNC=$(${JQ} .resync "${SCRIPT_DIR}/${FILE}.json")
 if [ "$RESYNC"  == "true" ]; then
@@ -199,7 +204,7 @@ if [ "$FORK_CHECK" == "true" ]; then
   while [[ ! "$CHECK_STATUS" == "OK" ]]; do
     # collect data
     HEIGHT_LOCAL=$(su "${DAEMON_USER}" -c "${RPC_CLIENT} -chain=${COIN} -datadir=${CHAIN_FOLDER} getinfo | ${JQ} .blocks")
-    HEIGHT_REMOTE=$(${CURL} --silent ${EXPLORER}/api/getblockcount)
+    HEIGHT_REMOTE=$(${CURL} --silent --data-binary '{"jsonrpc": "1.0", "id":"Bootstrap creation script", "method": "getblockcount", "params": [] }' -H 'content-type: text/plain;' ${API} | ${JQ} -r .result)
     HEIGHT_DISTANCE=$(echo "${HEIGHT_LOCAL}-${HEIGHT_REMOTE}" | ${BC} | ${TR} -d -)
     # determine status
     # either output empty = unknown
@@ -230,7 +235,7 @@ if [ "$FORK_CHECK" == "true" ]; then
     # collect data
     HASH_LOCAL=$(su "${DAEMON_USER}" -c "${RPC_CLIENT} -chain=${COIN} -datadir=${CHAIN_FOLDER} getbestblockhash")
 	HEIGHT_LOCAL=$(su "${DAEMON_USER}" -c "${RPC_CLIENT} -chain=${COIN} -datadir=${CHAIN_FOLDER} getblock ${HASH_LOCAL} 1 | ${JQ} -r .height")
-	HASH_REMOTE=$(${CURL} --silent "${EXPLORER}/api/getblockhash?index=${HEIGHT_LOCAL}" | ${JQ} -r .)
+	HASH_REMOTE=$(${CURL} --silent --data-binary "{\"jsonrpc\": \"1.0\", \"id\":\"Bootstrap Creation Script\", \"method\": \"getblockhash\", \"params\": [${HEIGHT_LOCAL}] }" -H 'content-type: text/plain;' ${API} | ${JQ} -r .result)
 
     # determine status
     # either output empty = unknown
