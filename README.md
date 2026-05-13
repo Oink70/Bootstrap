@@ -31,6 +31,7 @@ For stand-alone operations:
  - `CURL` installed.
  - `BC` installed.
  - `TR` installed.
+ - `PIGZ` installed.
  - A running webserver to host the webpage and bootstrap files.
 For dployment on multiple webservers:
  - Passwordless ssh access to the remote webserver (SSH-key and configured in `~/.ssh/config`)
